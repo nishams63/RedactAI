@@ -9,7 +9,6 @@ import logging
 from typing import Dict, Any, List
 
 import numpy as np
-import torch
 import matplotlib
 matplotlib.use("Agg")  # Non-interactive backend
 import matplotlib.pyplot as plt
@@ -41,8 +40,9 @@ DL_MODELS_DIR = os.path.join(
 os.makedirs(DL_MODELS_DIR, exist_ok=True)
 
 
-def export_to_onnx(model: torch.nn.Module, max_length: int = 512) -> str:
+def export_to_onnx(model: Any, max_length: int = 512) -> str:
     """Export PyTorch transformer model to ONNX for fast inference."""
+    import torch
     if not ONNX_AVAILABLE:
         logger.warning("ONNX or onnxruntime packages missing. Skipping ONNX export.")
         return ""

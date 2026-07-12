@@ -2,12 +2,9 @@
 import os
 import hashlib
 import numpy as np
-try:
-    import torch
-except ImportError:
-    torch = None
 from typing import List
 from services.legal_ai.cache_manager import CacheManager
+from core.optional_dependencies import OptionalDependencyManager
 
 class LocalSentenceEmbedder:
     def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
@@ -17,11 +14,12 @@ class LocalSentenceEmbedder:
 
     def _load_model(self):
         """Attempts to load transformers model. Falls back gracefully if offline."""
-        if torch is None:
-            print("Torch is not installed. Using local sentence embedder fallback.")
+        if not OptionalDependencyManager.is_installed("torch") or not OptionalDependencyManager.is_installed("transformers"):
+            print("Torch or transformers not installed. Using local sentence embedder fallback.")
             self.use_fallback = True
             return
         try:
+            import torch
             from transformers import AutoTokenizer, AutoModel
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
             self.model = AutoModel.from_pretrained(self.model_name)
@@ -32,6 +30,7 @@ class LocalSentenceEmbedder:
             self.use_fallback = True
 
     def _mean_pooling(self, model_output, attention_mask):
+        import torch
         token_embeddings = model_output[0]
         input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
         return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
@@ -48,6 +47,7 @@ class LocalSentenceEmbedder:
             emb = (emb / np.linalg.norm(emb)).tolist()
         else:
             try:
+                import torch
                 inputs = self.tokenizer(text, padding=True, truncation=True, max_length=512, return_tensors="pt")
                 with torch.no_grad():
                     model_output = self.model(**inputs)
@@ -83,6 +83,7 @@ class LocalSentenceEmbedder:
                     results[idx] = emb
             else:
                 try:
+                    import torch
                     inputs = self.tokenizer(miss_texts, padding=True, truncation=True, max_length=512, return_tensors="pt")
                     with torch.no_grad():
                         model_output = self.model(**inputs)

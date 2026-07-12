@@ -10,9 +10,19 @@ from typing import Dict, Any, List, Tuple
 
 import numpy as np
 import pandas as pd
-import torch
-from torch.utils.data import Dataset
-from transformers import AutoTokenizer
+
+try:
+    import torch
+    from torch.utils.data import Dataset
+except (ImportError, ModuleNotFoundError):
+    torch = None
+    class Dataset:  # type: ignore
+        pass
+
+try:
+    from transformers import AutoTokenizer
+except (ImportError, ModuleNotFoundError):
+    AutoTokenizer = None
 
 from services.ml.config import SENSITIVITY_CLASSES
 
@@ -26,19 +36,21 @@ def set_reproducibility_seeds(seed: int = 42) -> Dict[str, int]:
     """Set seeds for reproducibility across Python, NumPy, and PyTorch."""
     random.seed(seed)
     np.random.seed(seed)
-    torch.manual_seed(seed)
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(seed)
     
-    # Ensure deterministic behavior in CUDA
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
+    if torch is not None:
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(seed)
+        
+        # Ensure deterministic behavior in CUDA
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
 
     logger.info(f"Reproducibility seeds set: seed={seed}")
     return {
         "python_seed": seed,
         "numpy_seed": seed,
-        "pytorch_seed": seed,
+        "pytorch_seed": seed if torch is not None else -1,
     }
 
 
@@ -59,6 +71,8 @@ class SensitivityDataset(Dataset):
         
         # Load tokenizer with local caching
         try:
+            if AutoTokenizer is None:
+                raise RuntimeError("HuggingFace transformers is not installed.")
             self.tokenizer = AutoTokenizer.from_pretrained(
                 tokenizer_name,
                 cache_dir=MODEL_CACHE_DIR,
@@ -69,7 +83,7 @@ class SensitivityDataset(Dataset):
             raise e
             
         # Fast Dev Mode on CPU: reduce sequence length to 64 for instant execution
-        if not torch.cuda.is_available():
+        if torch is None or not torch.cuda.is_available():
             self.max_length = min(max_length, 64)
         else:
             self.max_length = max_length
@@ -122,6 +136,8 @@ def prepare_dl_data(
     
     Generates reproducibility metadata and dataset hash.
     """
+    if torch is None or AutoTokenizer is None:
+        raise RuntimeError("PyTorch/transformers is not installed. Cannot prepare DL data.")
     set_reproducibility_seeds(seed)
     
     # Check split bounds

@@ -8,10 +8,7 @@ import statistics
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 from sqlalchemy.orm import Session
-from reportlab.lib.pagesizes import letter
-from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+# reportlab imports deferred to lazy PDF generation handler to prevent startup dependency side-effects
 
 from models.ai_models import PerformanceBenchmark, PerformanceProfile, BenchmarkQuestion
 from services.legal_ai.cache_manager import CacheManager
@@ -219,121 +216,144 @@ class PerformanceProfiler:
 
         # 3. PDF Report using ReportLab
         pdf_path = os.path.join(REPORTS_DIR, "Performance_Report.pdf")
-        doc = SimpleDocTemplate(pdf_path, pagesize=letter, leftMargin=40, rightMargin=40, topMargin=40, bottomMargin=40)
-        styles = getSampleStyleSheet()
-        story = []
-
-        # Color palette
-        primary_color = colors.HexColor("#0f172a") # dark slate
-        secondary_color = colors.HexColor("#3b82f6") # blue
-        text_color = colors.HexColor("#334155")
-        light_bg = colors.HexColor("#f8fafc")
-
-        title_style = ParagraphStyle(
-            "DocTitle",
-            parent=styles["Normal"],
-            fontName="Helvetica-Bold",
-            fontSize=24,
-            leading=28,
-            textColor=primary_color,
-            spaceAfter=6
-        )
-        subtitle_style = ParagraphStyle(
-            "DocSubtitle",
-            parent=styles["Normal"],
-            fontName="Helvetica",
-            fontSize=12,
-            leading=16,
-            textColor=secondary_color,
-            spaceAfter=20
-        )
-        h1_style = ParagraphStyle(
-            "SectionHeader",
-            parent=styles["Normal"],
-            fontName="Helvetica-Bold",
-            fontSize=16,
-            leading=20,
-            textColor=primary_color,
-            spaceBefore=14,
-            spaceAfter=10
-        )
-        body_style = ParagraphStyle(
-            "BodyTextCustom",
-            parent=styles["Normal"],
-            fontName="Helvetica",
-            fontSize=10,
-            leading=14,
-            textColor=text_color,
-            spaceAfter=10
-        )
-
-        story.append(Paragraph("RedactAI Performance Benchmark Report", title_style))
-        story.append(Paragraph(f"Generated at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} (IST) | Run ID: {record.id}", subtitle_style))
-        story.append(Spacer(1, 10))
-
-        # Main metrics table
-        story.append(Paragraph("System Load & Processing Performance", h1_style))
-        metrics_data = [
-            [Paragraph("<b>Metric</b>", body_style), Paragraph("<b>Value</b>", body_style), Paragraph("<b>Target Threshold</b>", body_style)],
-            [Paragraph("Concurrency Load", body_style), Paragraph(f"{record.concurrency} threads", body_style), Paragraph("-", body_style)],
-            [Paragraph("Throughput", body_style), Paragraph(f"{record.throughput} reqs/sec", body_style), Paragraph("&gt; 5.0 reqs/sec", body_style)],
-            [Paragraph("Average Query Latency", body_style), Paragraph(f"{record.avg_latency} ms", body_style), Paragraph("&lt; 2000 ms", body_style)],
-            [Paragraph("Peak Latency", body_style), Paragraph(f"{record.peak_latency} ms", body_style), Paragraph("&lt; 5000 ms", body_style)],
-            [Paragraph("Request Failure Rate", body_style), Paragraph(f"{round(record.failure_rate * 100, 2)} %", body_style), Paragraph("&lt; 1.0 %", body_style)],
-            [Paragraph("Avg CPU Load", body_style), Paragraph(f"{record.cpu_util} %", body_style), Paragraph("&lt; 85 %", body_style)],
-            [Paragraph("Avg RAM Load", body_style), Paragraph(f"{record.ram_util} %", body_style), Paragraph("&lt; 90 %", body_style)]
-        ]
         
-        t = Table(metrics_data, colWidths=[200, 150, 180])
-        t.setStyle(TableStyle([
-            ('BACKGROUND', (0,0), (-1,0), light_bg),
-            ('BOTTOMPADDING', (0,0), (-1,0), 6),
-            ('ALIGN', (0,0), (-1,-1), 'LEFT'),
-            ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
-            ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, light_bg])
-        ]))
-        story.append(t)
-        story.append(Spacer(1, 15))
+        # Remove any existing error file first
+        err_txt_path = pdf_path.replace(".pdf", "_error.txt")
+        if os.path.exists(err_txt_path):
+            try:
+                os.remove(err_txt_path)
+            except Exception:
+                pass
 
-        # Cache performance section
-        story.append(Paragraph("Central Cache Statistics", h1_style))
-        cache_data = [
-            [Paragraph("<b>Cache Scope</b>", body_style), Paragraph("<b>Item Count</b>", body_style), Paragraph("<b>Hits</b>", body_style), Paragraph("<b>Misses</b>", body_style), Paragraph("<b>Hit Rate</b>", body_style)]
-        ]
-        for key, stats in record.cache_stats.items():
-            cache_data.append([
-                Paragraph(key.upper(), body_style),
-                Paragraph(str(stats.get("item_count", 0)), body_style),
-                Paragraph(str(stats.get("hits", 0)), body_style),
-                Paragraph(str(stats.get("misses", 0)), body_style),
-                Paragraph(f"{round(stats.get('hit_rate', 0.0) * 100, 1)} %", body_style)
-            ])
-        t_cache = Table(cache_data, colWidths=[130, 100, 100, 100, 100])
-        t_cache.setStyle(TableStyle([
-            ('BACKGROUND', (0,0), (-1,0), light_bg),
-            ('BOTTOMPADDING', (0,0), (-1,0), 6),
-            ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
-            ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, light_bg])
-        ]))
-        story.append(t_cache)
-        story.append(Spacer(1, 15))
+        try:
+            from reportlab.lib.pagesizes import letter
+            from reportlab.lib import colors
+            from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
-        # Regression / Improvement section
-        story.append(Paragraph("Performance Regression Analysis", h1_style))
-        if not record.regression_report and not record.improvement_report:
-            story.append(Paragraph("No historical baseline found. Performance comparisons will activate on subsequent test runs.", body_style))
-        else:
-            if record.improvement_report:
-                story.append(Paragraph("<b>Improvements Detected:</b>", body_style))
-                for metric, detail in record.improvement_report.items():
-                    story.append(Paragraph(f"• <font color='green'>[IMPROVEMENT]</font> {detail.get('message')}", body_style))
-                story.append(Spacer(1, 5))
-            if record.regression_report:
-                story.append(Paragraph("<b>Regressions Detected:</b>", body_style))
-                for metric, detail in record.regression_report.items():
-                    story.append(Paragraph(f"• <font color='red'>[REGRESSION - {detail.get('severity')}]</font> {detail.get('message')}", body_style))
+            doc = SimpleDocTemplate(pdf_path, pagesize=letter, leftMargin=40, rightMargin=40, topMargin=40, bottomMargin=40)
+            styles = getSampleStyleSheet()
+            story = []
+
+            # Color palette
+            primary_color = colors.HexColor("#0f172a") # dark slate
+            secondary_color = colors.HexColor("#3b82f6") # blue
+            text_color = colors.HexColor("#334155")
+            light_bg = colors.HexColor("#f8fafc")
+
+            title_style = ParagraphStyle(
+                "DocTitle",
+                parent=styles["Normal"],
+                fontName="Helvetica-Bold",
+                fontSize=24,
+                leading=28,
+                textColor=primary_color,
+                spaceAfter=6
+            )
+            subtitle_style = ParagraphStyle(
+                "DocSubtitle",
+                parent=styles["Normal"],
+                fontName="Helvetica",
+                fontSize=12,
+                leading=16,
+                textColor=secondary_color,
+                spaceAfter=20
+            )
+            h1_style = ParagraphStyle(
+                "SectionHeader",
+                parent=styles["Normal"],
+                fontName="Helvetica-Bold",
+                fontSize=16,
+                leading=20,
+                textColor=primary_color,
+                spaceBefore=14,
+                spaceAfter=10
+            )
+            body_style = ParagraphStyle(
+                "BodyTextCustom",
+                parent=styles["Normal"],
+                fontName="Helvetica",
+                fontSize=10,
+                leading=14,
+                textColor=text_color,
+                spaceAfter=10
+            )
+
+            story.append(Paragraph("RedactAI Performance Benchmark Report", title_style))
+            story.append(Paragraph(f"Generated at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} (IST) | Run ID: {record.id}", subtitle_style))
+            story.append(Spacer(1, 10))
+
+            # Main metrics table
+            story.append(Paragraph("System Load & Processing Performance", h1_style))
+            metrics_data = [
+                [Paragraph("<b>Metric</b>", body_style), Paragraph("<b>Value</b>", body_style), Paragraph("<b>Target Threshold</b>", body_style)],
+                [Paragraph("Concurrency Load", body_style), Paragraph(f"{record.concurrency} threads", body_style), Paragraph("-", body_style)],
+                [Paragraph("Throughput", body_style), Paragraph(f"{record.throughput} reqs/sec", body_style), Paragraph("&gt; 5.0 reqs/sec", body_style)],
+                [Paragraph("Average Query Latency", body_style), Paragraph(f"{record.avg_latency} ms", body_style), Paragraph("&lt; 2000 ms", body_style)],
+                [Paragraph("Peak Query Latency", body_style), Paragraph(f"{record.peak_latency} ms", body_style), Paragraph("&lt; 5000 ms", body_style)],
+                [Paragraph("Request Failure Rate", body_style), Paragraph(f"{record.failure_rate} %", body_style), Paragraph("0.0 %", body_style)],
+                [Paragraph("Average CPU Load", body_style), Paragraph(f"{record.cpu_util} %", body_style), Paragraph("&lt; 85 %", body_style)],
+                [Paragraph("Average Memory Load", body_style), Paragraph(f"{record.ram_util} %", body_style), Paragraph("&lt; 90 %", body_style)]
+            ]
+            t_metrics = Table(metrics_data, colWidths=[200, 160, 170])
+            t_metrics.setStyle(TableStyle([
+                ('BACKGROUND', (0,0), (-1,0), light_bg),
+                ('BOTTOMPADDING', (0,0), (-1,0), 6),
+                ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
+                ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, light_bg])
+            ]))
+            story.append(t_metrics)
+            story.append(Spacer(1, 15))
+
+            # Cache Statistics Table
+            story.append(Paragraph("Subsystem Cache Hit/Miss Audits", h1_style))
+            cache_data = [
+                [Paragraph("<b>Cache Scope</b>", body_style), Paragraph("<b>Item Count</b>", body_style), Paragraph("<b>Hits</b>", body_style), Paragraph("<b>Misses</b>", body_style), Paragraph("<b>Hit Rate</b>", body_style)]
+            ]
+            for key, stats in record.cache_stats.items():
+                cache_data.append([
+                    Paragraph(key.upper(), body_style),
+                    Paragraph(str(stats.get("item_count", 0)), body_style),
+                    Paragraph(str(stats.get("hits", 0)), body_style),
+                    Paragraph(str(stats.get("misses", 0)), body_style),
+                    Paragraph(f"{round(stats.get('hit_rate', 0.0) * 100, 1)} %", body_style)
+                ])
+            t_cache = Table(cache_data, colWidths=[130, 100, 100, 100, 100])
+            t_cache.setStyle(TableStyle([
+                ('BACKGROUND', (0,0), (-1,0), light_bg),
+                ('BOTTOMPADDING', (0,0), (-1,0), 6),
+                ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
+                ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, light_bg])
+            ]))
+            story.append(t_cache)
+            story.append(Spacer(1, 15))
+
+            # Regression / Improvement section
+            story.append(Paragraph("Performance Regression Analysis", h1_style))
+            if not record.regression_report and not record.improvement_report:
+                story.append(Paragraph("No historical baseline found. Performance comparisons will activate on subsequent test runs.", body_style))
             else:
-                story.append(Paragraph("<font color='green'>✓ No performance regressions detected compared to previous baseline.</font>", body_style))
+                if record.improvement_report:
+                    story.append(Paragraph("<b>Improvements Detected:</b>", body_style))
+                    for metric, detail in record.improvement_report.items():
+                        story.append(Paragraph(f"• <font color='green'>[IMPROVEMENT]</font> {detail.get('message')}", body_style))
+                    story.append(Spacer(1, 5))
+                if record.regression_report:
+                    story.append(Paragraph("<b>Regressions Detected:</b>", body_style))
+                    for metric, detail in record.regression_report.items():
+                        story.append(Paragraph(f"• <font color='red'>[REGRESSION - {detail.get('severity')}]</font> {detail.get('message')}", body_style))
+                else:
+                    story.append(Paragraph("<font color='green'>✓ No performance regressions detected compared to previous baseline.</font>", body_style))
 
-        doc.build(story)
-        print(f"Successfully generated reports: JSON, CSV, PDF saved in {REPORTS_DIR}")
+            doc.build(story)
+            print(f"Successfully generated reports: JSON, CSV, PDF saved in {REPORTS_DIR}")
+        except (ImportError, ModuleNotFoundError) as e:
+            import logging
+            logging.getLogger("redactai.performance_profiler").warning(
+                f"ReportLab is not installed. Skipping performance PDF generation: {e}"
+            )
+            try:
+                with open(err_txt_path, "w") as f:
+                    f.write("Performance PDF report is unavailable because reportlab package is missing.")
+            except Exception:
+                pass

@@ -145,25 +145,133 @@ def validate_startup_secrets() -> None:
         "description": "Writable local file preview storage directory verified."
     }
 
-    # Check capabilities status for diagnostic table
-    ocr_available = "Enabled (PyMuPDF / PyPDF ready)"
-    ml_available = "Online (Loaded)"
+    # 7. AI Dependencies check and manifest generation
+    from core.optional_dependencies import OptionalDependencyManager
+    all_deps = OptionalDependencyManager.get_all_status()
+    installed_count = sum(1 for d in all_deps.values() if d["installed"])
+
+    # Minimum Subsystem Rule checks
+    # OCR subsystem: EasyOCR or PaddleOCR or fallback
+    ocr_active = True  # Fallback OCR / local text extraction always available
+    # Sensitivity subsystem: torch (DL) or xgboost (ML) or fallback
+    sensitivity_active = True  # Rule-based fallback always available
+    # Legal AI subsystem: torch/transformers or fallback
+    legal_active = True  # Rule-based fallback always available
+
+    minimum_subsystem_ok = ocr_active and sensitivity_active and legal_active
     
-    # Check DL availability (Torch check)
-    try:
-        import torch
-        dl_available = "Ready (PyTorch online)"
-    except ImportError:
-        dl_available = "Disabled (PyTorch not installed)"
-        
-    # Check Legal AI availability
-    try:
-        from transformers import AutoTokenizer
-        legal_ai_available = "Ready (Transformers online)"
-    except ImportError:
-        legal_ai_available = "Rule-based fallback active"
-        
-    embedding_model = "sentence-transformers/all-MiniLM-L6-v2 (Lazy Loaded)"
+    # Grade Calculation
+    if not minimum_subsystem_ok:
+        grade = "F"
+    elif installed_count == len(all_deps):
+        grade = "A"
+    elif all_deps["torch"]["installed"] and all_deps["transformers"]["installed"] and installed_count >= 5:
+        grade = "B"
+    elif all_deps["torch"]["installed"] or all_deps["transformers"]["installed"] or all_deps["xgboost"]["installed"]:
+        grade = "C"
+    elif installed_count > 0:
+        grade = "D"
+    else:
+        grade = "E"
+
+    # Generate Manifest Dict
+    manifest_data = {
+        "deployment_profile": mode,
+        "grade": grade,
+        "dependencies": all_deps
+    }
+
+    # Write DEPENDENCY_MANIFEST.json
+    backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    workspace_dir = os.path.dirname(backend_dir)
+    
+    for folder in [workspace_dir, backend_dir]:
+        manifest_path = os.path.join(folder, "DEPENDENCY_MANIFEST.json")
+        try:
+            with open(manifest_path, "w") as f:
+                json.dump(manifest_data, f, indent=4)
+        except Exception as e:
+            logger.warning(f"Failed to write DEPENDENCY_MANIFEST.json to {folder}: {e}")
+
+    # Determine working, fallback, and disabled features lists for the report
+    working_features = [
+        "SQLite database initializer",
+        f"Deployment Profile: {mode}",
+        "Local filesystem storage driver"
+    ]
+    fallback_features = []
+    disabled_features = []
+
+    # ML Feature
+    if all_deps["xgboost"]["installed"]:
+        working_features.append("PII / Sensitivity Classification (Traditional ML - XGBoost)")
+    else:
+        fallback_features.append("PII / Sensitivity Classification (Rule-based fallback active)")
+        disabled_features.append("PII / Sensitivity Classification (XGBoost ML model)")
+
+    # DL Feature
+    if all_deps["torch"]["installed"] and all_deps["transformers"]["installed"]:
+        working_features.append("Deep Learning (LegalBERT / LayoutLM tokenizers & classifiers)")
+    else:
+        fallback_features.append("Deep Learning (Rule-based fallback active)")
+        disabled_features.append("Deep Learning (LegalBERT/LayoutLM neural inference)")
+
+    # OCR Feature
+    if all_deps["easyocr"]["installed"] or all_deps["paddleocr"]["installed"]:
+        working_features.append("OCR Pipeline (EasyOCR/PaddleOCR engines)")
+    else:
+        fallback_features.append("OCR Pipeline (PyMuPDF / PyPDF text parser fallback active)")
+        disabled_features.append("OCR Pipeline (EasyOCR/PaddleOCR neural engines)")
+
+    # RAG / Embedding Feature
+    if all_deps["sentence_transformers"]["installed"] or (all_deps["torch"]["installed"] and all_deps["transformers"]["installed"]):
+        working_features.append("Legal AI Q&A and RAG Semantic Embeddings")
+    else:
+        fallback_features.append("Legal AI Q&A and RAG Semantic Embeddings (Rule-based fallback active)")
+        disabled_features.append("Legal AI Q&A and RAG Semantic Embeddings (Transformers/Torch neural model)")
+
+    # Generate STARTUP_COMPATIBILITY_REPORT.md
+    report_content = f"""# Startup Compatibility Report
+
+- **Deployment Profile**: {mode}
+- **Deployment Grade**: {grade}
+
+## Subsystems Status
+- **OCR Subsystem**: {"ACTIVE" if ocr_active else "INACTIVE"}
+- **Sensitivity / PII Subsystem**: {"ACTIVE" if sensitivity_active else "INACTIVE"}
+- **Legal AI / RAG Subsystem**: {"ACTIVE" if legal_active else "INACTIVE"}
+
+## Feature Classifications
+
+### Working Features
+{chr(10).join(f'- {f}' for f in working_features)}
+
+### Fallback Features
+{chr(10).join(f'- {f}' for f in fallback_features) if fallback_features else "- None"}
+
+### Disabled Features
+{chr(10).join(f'- {f}' for f in disabled_features) if disabled_features else "- None"}
+
+## Dependency Manifest
+
+```json
+{json.dumps(manifest_data, indent=4)}
+```
+"""
+    for folder in [workspace_dir, backend_dir]:
+        report_md_path = os.path.join(folder, "STARTUP_COMPATIBILITY_REPORT.md")
+        try:
+            with open(report_md_path, "w") as f:
+                f.write(report_content)
+        except Exception as e:
+            logger.warning(f"Failed to write STARTUP_COMPATIBILITY_REPORT.md to {folder}: {e}")
+
+    # Check capabilities status for diagnostic table
+    ocr_available = "Enabled (PyMuPDF / PyPDF ready)" if ocr_active else "Disabled"
+    ml_available = "Online (Loaded)" if all_deps["xgboost"]["installed"] else "Rule-based fallback active"
+    dl_available = "Ready (PyTorch online)" if all_deps["torch"]["installed"] else "Disabled (PyTorch not installed)"
+    legal_ai_available = "Ready (Transformers online)" if all_deps["transformers"]["installed"] else "Rule-based fallback active"
+    embedding_model = "sentence-transformers/all-MiniLM-L6-v2 (Lazy Loaded)" if all_deps["sentence_transformers"]["installed"] else "Fallback random generator"
     slm_model = "Qwen/Qwen2.5-0.5B-Instruct (Lazy Loaded / Bypassed)"
 
     # Print Diagnostics Table
@@ -171,6 +279,7 @@ def validate_startup_secrets() -> None:
     print("                     REDACTAI STARTUP DIAGNOSTICS")
     print("="*70)
     print(f"| Deployment Mode      | {mode:<43} |")
+    print(f"| Deployment Grade     | {grade:<43} |")
     print(f"| Frontend             | {'Running / Proxied (Nginx)':<43} |")
     print(f"| FastAPI              | {'Online':<43} |")
     print(f"| SQLite               | {'Initialized (redactai.db)' if db_status == 'PASSED' else 'FAILED':<43} |")
@@ -186,14 +295,17 @@ def validate_startup_secrets() -> None:
     print("="*70 + "\n")
 
     # Save configuration report
-    if critical_failed:
+    if critical_failed or not minimum_subsystem_ok:
         report["validation_status"] = "FAILED"
         
     report_path = os.path.join(REPORTS_DIR, "Configuration_Report.json")
-    with open(report_path, "w") as f:
-        json.dump(report, f, indent=4)
+    try:
+        with open(report_path, "w") as f:
+            json.dump(report, f, indent=4)
+    except Exception as e:
+        logger.warning(f"Failed to write Configuration_Report.json: {e}")
 
-    if critical_failed:
+    if critical_failed or not minimum_subsystem_ok:
         sys.exit("CRITICAL: Startup configurations checks failed. Check Configuration_Report.json.")
 
     print("=== STARTUP VALIDATION COMPLETED SUCCESSFULLY ===")

@@ -8,17 +8,12 @@ import time
 import logging
 from typing import Dict, Any, List, Optional
 
-import torch
 import numpy as np
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 from services.ml.config import SENSITIVITY_CLASSES
 from services.deep_learning.interfaces import DocumentClassifier
 from services.deep_learning.dataset import MODEL_CACHE_DIR
 from services.deep_learning.utils import DL_MODELS_DIR, ONNX_AVAILABLE
-
-if ONNX_AVAILABLE:
-    import onnxruntime as ort
 
 logger = logging.getLogger("redactai.dl.predictor")
 
@@ -37,22 +32,32 @@ class LegalBERTClassifier(DocumentClassifier):
         self.tokenizer = None
         self.model = None
         self.ort_session = None
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         
-        # Load Tokenizer with cache
         try:
-            self.tokenizer = AutoTokenizer.from_pretrained(
-                self.model_name,
-                cache_dir=MODEL_CACHE_DIR,
-                local_files_only=False
-            )
-        except Exception as e:
-            logger.error(f"Failed to load tokenizer: {e}")
+            import torch
+            from transformers import AutoTokenizer, AutoModelForSequenceClassification
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            torch_available = True
+        except (ImportError, ModuleNotFoundError):
+            self.device = "cpu"
+            torch_available = False
+            
+        # Load Tokenizer with cache
+        if torch_available:
+            try:
+                self.tokenizer = AutoTokenizer.from_pretrained(
+                    self.model_name,
+                    cache_dir=MODEL_CACHE_DIR,
+                    local_files_only=False
+                )
+            except Exception as e:
+                logger.error(f"Failed to load tokenizer: {e}")
 
         # Check if ONNX model is available and requested
         onnx_path = os.path.join(DL_MODELS_DIR, "model.onnx")
         if use_onnx and ONNX_AVAILABLE and os.path.exists(onnx_path):
             try:
+                import onnxruntime as ort
                 logger.info(f"Loading ONNX Model Session: {onnx_path}")
                 # Set thread limits for local development
                 opts = ort.SessionOptions()
@@ -63,7 +68,7 @@ class LegalBERTClassifier(DocumentClassifier):
                 logger.warning(f"Failed to load ONNX session: {e}. Falling back to PyTorch.")
 
         # Load PyTorch model if ONNX was not loaded/available
-        if self.ort_session is None:
+        if self.ort_session is None and torch_available:
             pt_path = os.path.join(DL_MODELS_DIR, "best_model.pt")
             if os.path.exists(pt_path):
                 try:
@@ -158,6 +163,7 @@ class LegalBERTClassifier(DocumentClassifier):
         
         # 2. Run PyTorch Inference
         elif self.model is not None:
+            import torch
             input_ids = inputs["input_ids"].to(self.device)
             attention_mask = inputs["attention_mask"].to(self.device)
             

@@ -14,10 +14,7 @@ from models.document_intelligence import DocumentMetadata, DocumentPage
 from schemas.dl import (
     DLTrainRequest, DLTrainResponse, DLComparisonResponse, DLInferenceResponse
 )
-from services.deep_learning.trainer import DLTrainer, PretrainedModelUnavailableError
-from services.deep_learning.evaluator import DLEvaluator
-from services.deep_learning.inference import DLInferenceEngine
-from services.deep_learning.utils import DL_MODELS_DIR
+# Deep Learning imports deferred to lazy handlers to prevent startup dependency side-effects
 from services.ml.dataset_generator import DatasetGenerator
 
 router = APIRouter(prefix="/dl", tags=["Deep Learning"])
@@ -54,6 +51,7 @@ def train_deep_learning(
     # Read dataset
     df = pd.read_csv(csv_path)
 
+    from services.deep_learning.trainer import DLTrainer, PretrainedModelUnavailableError
     trainer = DLTrainer(db)
     try:
         report = trainer.train(
@@ -111,6 +109,7 @@ def predict_dl_sensitivity(
     pages = db.query(DocumentPage).filter(DocumentPage.document_id == document_id).order_by(DocumentPage.page_number.asc()).all()
     text = " ".join(p.text for p in pages) if pages else ""
     
+    from services.deep_learning.inference import DLInferenceEngine
     engine = DLInferenceEngine(db)
     try:
         result = engine.predict_consensus(document_id, text)
@@ -134,6 +133,7 @@ def get_dl_evaluation(
     current_user: User = Depends(get_current_user),
 ):
     """Returns training loss, accuracy, and generated report links."""
+    from services.deep_learning.utils import DL_MODELS_DIR
     report_path = os.path.join(DL_MODELS_DIR, "training_report.json")
     if not os.path.exists(report_path):
         raise HTTPException(status_code=404, detail="DL training report not found. Train model first.")
@@ -149,6 +149,7 @@ def get_ml_dl_comparison(
 ):
     """Returns unified latency, throughput, memory, and accuracy comparison table."""
     try:
+        from services.deep_learning.evaluator import DLEvaluator
         comparison = DLEvaluator.get_comparison()
         return comparison
     except Exception as e:
@@ -160,6 +161,7 @@ def get_validation_report(
     current_user: User = Depends(get_current_user),
 ):
     """Returns the latest generated validation report."""
+    from services.deep_learning.utils import DL_MODELS_DIR
     report_path = os.path.join(DL_MODELS_DIR, "validation_report.json")
     if not os.path.exists(report_path):
         # Try root backup
@@ -181,6 +183,7 @@ def get_validation_pdf(
     pdf_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "Validation_Report.pdf")
     if not os.path.exists(pdf_path):
         # Fallback to model dir
+        from services.deep_learning.utils import DL_MODELS_DIR
         pdf_path = os.path.join(DL_MODELS_DIR, "Validation_Report.pdf")
         if not os.path.exists(pdf_path):
             raise HTTPException(status_code=404, detail="Validation PDF report not found. Run validation script first.")
@@ -196,6 +199,7 @@ def get_validation_pdf(
 def get_training_curve(filename: str):
     """Serve generated training curve images."""
     from fastapi.responses import FileResponse
+    from services.deep_learning.utils import DL_MODELS_DIR
     path = os.path.join(DL_MODELS_DIR, filename)
     if not os.path.exists(path) or filename not in ["loss_curve.png", "accuracy_curve.png"]:
         raise HTTPException(status_code=404, detail="Curve image not found")

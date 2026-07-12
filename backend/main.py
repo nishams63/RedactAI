@@ -86,3 +86,9 @@ def health_check():
         "environment": settings.ENVIRONMENT,
         "version": "1.0.0",
     }
+
+
+@app.get("/health/liveness", tags=["Health"])
+def health_liveness():
+    """Liveness endpoint to verify the API gateway process is up."""
+    return {"status": "alive"}

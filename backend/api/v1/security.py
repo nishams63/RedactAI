@@ -162,6 +162,11 @@ def download_security_pdf_report(
         checker.execute_security_tests()
         
     if not os.path.exists(pdf_path):
+        err_path = pdf_path.replace(".pdf", "_error.txt")
+        if os.path.exists(err_path):
+            with open(err_path, "r") as f:
+                err_msg = f.read()
+            raise HTTPException(status_code=503, detail=err_msg)
         raise HTTPException(status_code=404, detail="PDF report could not be compiled.")
         
     return FileResponse(

@@ -12,12 +12,6 @@ from typing import Dict, Any, List, Optional
 
 import numpy as np
 import pandas as pd
-import torch
-import torch.nn as nn
-from torch.utils.data import DataLoader
-from torch.utils.tensorboard import SummaryWriter
-from torch.optim import AdamW
-from transformers import AutoModelForSequenceClassification, get_linear_schedule_with_warmup
 
 from services.ml.config import SENSITIVITY_CLASSES
 from services.deep_learning.dataset import prepare_dl_data, MODEL_CACHE_DIR, set_reproducibility_seeds
@@ -38,18 +32,23 @@ class DLTrainer:
         self.db = db_session
         self.device = self._select_device()
 
-    def _select_device(self) -> torch.device:
+    def _select_device(self) -> Any:
         """Automatically select execution provider: CUDA -> MPS -> CPU."""
-        if torch.cuda.is_available():
-            dev = torch.device("cuda")
-            logger.info("Automatically selected CUDA device for training.")
-        elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
-            dev = torch.device("mps")
-            logger.info("Automatically selected MPS device for training.")
-        else:
-            dev = torch.device("cpu")
-            logger.info("Automatically selected CPU device for training.")
-        return dev
+        try:
+            import torch
+            if torch.cuda.is_available():
+                dev = torch.device("cuda")
+                logger.info("Automatically selected CUDA device for training.")
+            elif hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+                dev = torch.device("mps")
+                logger.info("Automatically selected MPS device for training.")
+            else:
+                dev = torch.device("cpu")
+                logger.info("Automatically selected CPU device for training.")
+            return dev
+        except (ImportError, ModuleNotFoundError):
+            logger.info("Torch not available. Selected CPU for device fallback.")
+            return "cpu"
 
     def train(
         self,
@@ -64,13 +63,22 @@ class DLTrainer:
         """
         Runs the full Deep Learning training loop.
         """
+        # Local imports for heavy libraries
+        import torch
+        import torch.nn as nn
+        from torch.utils.data import DataLoader
+        from torch.utils.tensorboard import SummaryWriter
+        from torch.optim import AdamW
+        from transformers import AutoModelForSequenceClassification, get_linear_schedule_with_warmup
+
         start_time = time.time()
         logger.info(f"Initiating Deep Learning training: model={model_name}, epochs={epochs}")
 
         # ─── 1. Reproducibility & Seeds ────────────────────────────────────
         seeds = set_reproducibility_seeds(seed)
 
-        if self.device.type == "cpu":
+        is_cpu = (self.device == "cpu") if isinstance(self.device, str) else (self.device.type == "cpu")
+        if is_cpu:
             logger.info("Fast dev mode: downsampling dataset to 80 samples and overriding epochs to 1 on CPU device.")
             dataset_df = dataset_df.head(80)
             epochs = 1
@@ -361,8 +369,10 @@ class DLTrainer:
 
         return report_data
 
-    def _validate(self, model: nn.Module, loader: DataLoader) -> Tuple[float, float]:
+    def _validate(self, model: Any, loader: Any) -> Tuple[float, float]:
         """Run validation loop."""
+        import torch
+        import torch.nn as nn
         model.eval()
         val_loss = 0.0
         correct = 0
@@ -387,8 +397,9 @@ class DLTrainer:
 
         return val_loss / min(len(loader), 2) if self.device.type == "cpu" else val_loss / len(loader), correct / total
 
-    def _evaluate(self, model: nn.Module, loader: DataLoader) -> Tuple[float, float, Dict[str, float]]:
+    def _evaluate(self, model: Any, loader: Any) -> Tuple[float, float, Dict[str, float]]:
         """Evaluate model on the test set collecting detailed metrics."""
+        import torch
         model.eval()
         test_loss = 0.0
         all_preds = []
