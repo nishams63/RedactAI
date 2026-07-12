@@ -72,9 +72,14 @@ def setup_middleware(app: FastAPI) -> None:
         allow_headers=["*"],
     )
 
+    # Proxy Headers (real client IP mapping in production behind load balancers)
+    from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
+    app.add_middleware(ProxyHeadersMiddleware, trusted_proxies="*")
+
     # Trusted hosts (production hardening)
     if settings.ENVIRONMENT == "production":
-        app.add_middleware(TrustedHostMiddleware, allowed_hosts=["app.redactai.in", "api.redactai.in"])
+        hosts = settings.ALLOWED_HOSTS if isinstance(settings.ALLOWED_HOSTS, list) else [settings.ALLOWED_HOSTS]
+        app.add_middleware(TrustedHostMiddleware, allowed_hosts=hosts)
 
     # Global exception handler
     app.add_middleware(GlobalExceptionMiddleware)

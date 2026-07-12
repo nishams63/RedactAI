@@ -84,7 +84,7 @@ export default function DocumentViewerPage() {
     acc[ent.entity_type] = acc[ent.entity_type] || [];
     acc[ent.entity_type].push(ent);
     return acc;
-  }, {});
+  }, {} as Record<string, any[]>);
 
   // Highlighting algorithm
   const renderHighlightedText = () => {
@@ -234,6 +234,7 @@ export default function DocumentViewerPage() {
               ) : (
                 <div className="space-y-4">
                   {Object.entries(entitiesByType).map(([type, list]) => {
+                    const listArray = list as any[];
                     const colors = ENTITY_COLORS[type] || { text: "text-brand-400", dot: "bg-brand-500" };
                     return (
                       <div key={type} className="space-y-2">
@@ -242,11 +243,11 @@ export default function DocumentViewerPage() {
                             <span className={`w-1.5 h-1.5 rounded-full ${colors.dot}`} /> {type}
                           </span>
                           <span className="text-[10px] bg-[rgb(var(--bg-secondary))] px-2 py-0.5 rounded-full text-[rgb(var(--text-secondary))] font-bold">
-                            {list.length}
+                            {listArray.length}
                           </span>
                         </div>
                         <div className="space-y-1 pl-3 border-l border-[rgb(var(--border-color))]/50">
-                          {list.map((ent: any) => (
+                          {listArray.map((ent: any) => (
                             <div key={ent.id} className="group relative flex justify-between text-xs p-1 hover:bg-[rgb(var(--bg-secondary))]/50 rounded transition-colors">
                               <span className="font-medium truncate max-w-[130px]" title={ent.value}>
                                 {ent.value}

@@ -144,7 +144,7 @@ class ApiClient {
   }
 
   async getDashboard() {
-    return this.request<{ stats: any; recent_activity: any[] }>("/documents/dashboard");
+    return this.request<{ stats: any; recent_activity: any[]; recent_jobs?: any[] }>("/documents/dashboard");
   }
 
   // ─── Machine Learning ──────────────────────────────────────────

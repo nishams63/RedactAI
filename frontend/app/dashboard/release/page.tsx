@@ -6,6 +6,8 @@ import {
   AlertCircle, Download, Activity, Play 
 } from "lucide-react";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+
 interface HealthCheck {
   status: string;
   checks: {
@@ -41,21 +43,21 @@ export default function ReleaseDashboard() {
       const headers = { Authorization: `Bearer ${token}` };
 
       // Liveness & Readiness Check - parse status even if 503 is returned
-      const healthRes = await fetch("http://localhost:8000/api/v1/release/health/readiness");
+      const healthRes = await fetch(`${API_URL}/release/health/readiness`);
       if (healthRes.status === 200 || healthRes.status === 503) {
         const healthData = await healthRes.json();
         setHealth(healthData);
       }
 
-      // Version Manifest
-      const manifestRes = await fetch("http://localhost:8000/api/v1/release/manifest");
+      // Manifest
+      const manifestRes = await fetch(`${API_URL}/release/manifest`);
       if (manifestRes.ok) {
         const manifestData = await manifestRes.json();
         setManifest(manifestData);
       }
 
       // Latencies
-      const latenciesRes = await fetch("http://localhost:8000/api/v1/release/health/dependencies");
+      const latenciesRes = await fetch(`${API_URL}/release/health/dependencies`);
       if (latenciesRes.ok) {
         const latenciesData = await latenciesRes.json();
         setLatencies(latenciesData.latencies);
@@ -78,7 +80,7 @@ export default function ReleaseDashboard() {
     try {
       // Trigger E2E runner tests
       const token = localStorage.getItem("access_token");
-      const res = await fetch("http://localhost:8000/api/v1/release/smoke-test", {
+      const res = await fetch(`${API_URL}/release/smoke-test`, {
         method: "POST",
         headers: { 
           "Authorization": `Bearer ${token}`,
@@ -100,7 +102,7 @@ export default function ReleaseDashboard() {
   const downloadReport = async (filename: string) => {
     try {
       const token = localStorage.getItem("access_token");
-      const res = await fetch(`http://localhost:8000/api/v1/release/download/${filename}`, {
+      const res = await fetch(`${API_URL}/release/download/${filename}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {

@@ -6,6 +6,8 @@ import {
   Trash2, RefreshCw, AlertTriangle, List, CheckCircle2 
 } from "lucide-react";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+
 interface SecurityStats {
   score: {
     authentication: number;
@@ -63,24 +65,24 @@ export default function SecurityPage() {
       const headers = { Authorization: `Bearer ${token}` };
 
       // Stats
-      const statsRes = await fetch("http://localhost:8000/api/v1/security/stats", { headers });
+      const statsRes = await fetch(`${API_URL}/security/stats`, { headers });
       const statsData = await statsRes.json();
       setStats(statsData);
 
       // Sessions
-      const sessionsRes = await fetch("http://localhost:8000/api/v1/security/sessions", { headers });
+      const sessionsRes = await fetch(`${API_URL}/security/sessions`, { headers });
       const sessionsData = await sessionsRes.json();
       setSessions(Array.isArray(sessionsData) ? sessionsData : []);
 
       // Audit Logs
-      const auditRes = await fetch("http://localhost:8000/api/v1/security/audit", { headers });
+      const auditRes = await fetch(`${API_URL}/security/audit`, { headers });
       if (auditRes.ok) {
         const auditData = await auditRes.json();
         setAuditLogs(Array.isArray(auditData) ? auditData : []);
       }
 
       // Alerts
-      const alertsRes = await fetch("http://localhost:8000/api/v1/security/alerts", { headers });
+      const alertsRes = await fetch(`${API_URL}/security/alerts`, { headers });
       if (alertsRes.ok) {
         const alertsData = await alertsRes.json();
         setAlerts(Array.isArray(alertsData) ? alertsData : []);
@@ -102,7 +104,7 @@ export default function SecurityPage() {
     setMessage(null);
     try {
       const token = localStorage.getItem("access_token");
-      const res = await fetch("http://localhost:8000/api/v1/security/test", {
+      const res = await fetch(`${API_URL}/security/test`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -122,7 +124,7 @@ export default function SecurityPage() {
   const downloadPDFReport = async () => {
     try {
       const token = localStorage.getItem("access_token");
-      const res = await fetch("http://localhost:8000/api/v1/security/report/download", {
+      const res = await fetch(`${API_URL}/security/report/download`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -145,7 +147,7 @@ export default function SecurityPage() {
   const revokeSession = async (sessionId: string) => {
     try {
       const token = localStorage.getItem("access_token");
-      const res = await fetch("http://localhost:8000/api/v1/security/sessions/revoke", {
+      const res = await fetch(`${API_URL}/security/sessions/revoke`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",

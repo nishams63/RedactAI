@@ -10,6 +10,8 @@ import {
   File, Image as ImageIcon, FileType,
 } from "lucide-react";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+
 const statusColors: Record<string, string> = {
   Pending: "badge-warning",
   Processed: "badge-success",
@@ -101,7 +103,7 @@ export default function DocumentsPage() {
       if (doc.status === "Processed") {
         cleanPath = cleanPath.replace("uploads/", "redacted/");
       }
-      window.open(`http://localhost:8000/api/v1/documents/local-preview/${cleanPath}`, "_blank");
+      window.open(`${API_URL}/documents/local-preview/${cleanPath}`, "_blank");
     } else {
       alert("Preview is only available for locally stored fallback files in Sprint 1.");
     }

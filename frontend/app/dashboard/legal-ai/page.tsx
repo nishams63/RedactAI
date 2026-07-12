@@ -431,8 +431,8 @@ export default function LegalAIDashboard() {
                     <div className="mt-2 w-[90%] p-3 bg-[rgb(var(--bg-secondary))]/50 border border-[rgb(var(--border-color))]/30 rounded-xl space-y-2">
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-bold text-[rgb(var(--text-secondary))]">
                         <span>Engine: <span className="text-brand-400">{msg.engine}</span></span>
-                        <span>Confidence: <span className="text-emerald-400">{msg.confidence * 100}%</span></span>
-                        <span>Latency: <span className="text-violet-400">{msg.timeMs}ms</span></span>
+                        <span>Confidence: <span className="text-emerald-400">{msg.confidence !== undefined ? Math.round(msg.confidence * 100) : 0}%</span></span>
+                        <span>Latency: <span className="text-violet-400">{msg.timeMs !== undefined ? msg.timeMs : 0}ms</span></span>
                       </div>
                       
                       <p className="text-[11px] text-[rgb(var(--text-secondary))] leading-relaxed font-medium">

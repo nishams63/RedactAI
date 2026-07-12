@@ -21,11 +21,12 @@ class Settings(BaseSettings):
     REDIS_URL: str
 
     # MinIO / S3
-    MINIO_ENDPOINT: str
-    MINIO_ACCESS_KEY: str
-    MINIO_SECRET_KEY: str
+    MINIO_ENDPOINT: Optional[str] = None
+    MINIO_ACCESS_KEY: Optional[str] = None
+    MINIO_SECRET_KEY: Optional[str] = None
     MINIO_BUCKET: str = "redactai-storage"
     MINIO_SECURE: bool = False
+    BACKEND_URL: str = "http://localhost:8000"
 
     # JWT & Encryption
     JWT_SECRET_KEY: str
@@ -39,9 +40,23 @@ class Settings(BaseSettings):
 
     # CORS
     CORS_ORIGINS: Union[str, List[str]] = []
+    ALLOWED_HOSTS: Union[str, List[str]] = ["*"]
 
     # Logging
     LOG_LEVEL: str = "INFO"
+
+    @field_validator("ALLOWED_HOSTS", mode="before")
+    @classmethod
+    def assemble_allowed_hosts(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
+        if isinstance(v, str) and not v.startswith("["):
+            return [i.strip() for i in v.split(",")]
+        elif isinstance(v, str) and v.startswith("["):
+            import json
+            try:
+                return json.loads(v)
+            except Exception:
+                return [v]
+        return v
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
