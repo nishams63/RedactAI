@@ -74,7 +74,7 @@ def setup_middleware(app: FastAPI) -> None:
 
     # Proxy Headers (real client IP mapping in production behind load balancers)
     from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
-    app.add_middleware(ProxyHeadersMiddleware, trusted_proxies="*")
+    app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 
     # Trusted hosts (production hardening)
     if settings.ENVIRONMENT == "production":

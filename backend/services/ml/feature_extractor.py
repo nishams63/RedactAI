@@ -27,13 +27,15 @@ class FeatureExtractor:
     def __init__(self, db: Session):
         self.db = db
 
-    def extract(self, document_id: uuid.UUID) -> Optional[Dict[str, Any]]:
+    def extract(self, document_id: Any) -> Optional[Dict[str, Any]]:
         """
         Extract all features for one document.
 
         Returns:
             Dict of feature_name -> value, or None if document not found.
         """
+        if isinstance(document_id, str):
+            document_id = uuid.UUID(document_id)
         doc = self.db.query(Document).filter(Document.id == document_id).first()
         if not doc:
             logger.warning(f"Document {document_id} not found for feature extraction.")

@@ -1,4 +1,5 @@
 import os
+import multiprocessing
 from typing import List, Union, Optional
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -13,12 +14,48 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 resolved_env_path = os.path.join(parent_dir, env_file_path)
 
+# Resource Detection
+cpu_count = multiprocessing.cpu_count()
+memory_bytes = 0
+try:
+    memory_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
+except (AttributeError, ValueError):
+    try:
+        import ctypes
+        class MEMORYSTATUSEX(ctypes.Structure):
+            _fields_ = [
+                ('dwLength', ctypes.c_ulong),
+                ('dwMemoryLoad', ctypes.c_ulong),
+                ('ullTotalPhys', ctypes.c_ulonglong),
+                ('ullAvailPhys', ctypes.c_ulonglong),
+                ('ullTotalPageFile', ctypes.c_ulonglong),
+                ('ullAvailPageFile', ctypes.c_ulonglong),
+                ('ullTotalVirtual', ctypes.c_ulonglong),
+                ('ullAvailVirtual', ctypes.c_ulonglong),
+                ('ullAvailExtendedVirtual', ctypes.c_ulonglong),
+            ]
+        stat = MEMORYSTATUSEX()
+        stat.dwLength = ctypes.sizeof(MEMORYSTATUSEX)
+        ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(stat))
+        memory_bytes = stat.ullTotalPhys
+    except Exception:
+        memory_bytes = 8 * 1024 * 1024 * 1024  # Default 8GB
+
+ram_mb = memory_bytes / (1024 * 1024)
+low_resource_mode = ram_mb < 4096 or cpu_count < 2
+
 class Settings(BaseSettings):
     ENVIRONMENT: str = env_name
+    DEPLOYMENT_MODE: str = os.getenv("DEPLOYMENT_MODE", "production")  # development, production, single, huggingface
+    
+    # Resource constraints metadata
+    RAM_MB: float = ram_mb
+    CPU_COUNT: int = cpu_count
+    LOW_RESOURCE_MODE: bool = low_resource_mode
 
     # DB & Cache
-    DATABASE_URL: str
-    REDIS_URL: str
+    DATABASE_URL: Optional[str] = None
+    REDIS_URL: Optional[str] = None
 
     # MinIO / S3
     MINIO_ENDPOINT: Optional[str] = None
@@ -37,6 +74,22 @@ class Settings(BaseSettings):
     PASSWORD_EXPIRATION_DAYS: int = 0 # 0 means disabled by default
     MAX_ACTIVE_SESSIONS: int = 5
     SESSION_LIMIT_STRATEGY: str = "terminate_oldest" # terminate_oldest or reject_login
+
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def default_database_url(cls, v: Optional[str]) -> Optional[str]:
+        mode = os.getenv("DEPLOYMENT_MODE", "production")
+        if not v or mode in ("single", "huggingface"):
+            return "sqlite:///./redactai.db"
+        return v
+
+    @field_validator("REDIS_URL", mode="before")
+    @classmethod
+    def default_redis_url(cls, v: Optional[str]) -> Optional[str]:
+        mode = os.getenv("DEPLOYMENT_MODE", "production")
+        if not v or mode in ("single", "huggingface"):
+            return ""
+        return v
 
     # CORS
     CORS_ORIGINS: Union[str, List[str]] = []

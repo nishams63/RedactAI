@@ -6,38 +6,63 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from sqlalchemy import inspect, text
 from database.session import engine, Base
+from core.config import settings
 import models  # noqa: F401
 
-def bootstrap():
-    """Drop any leftover tables from failed deploys, create all fresh, and stamp Alembic."""
-    inspector = inspect(engine)
-    existing_tables = inspector.get_table_names()
-    
-    if existing_tables:
-        print(f"Found {len(existing_tables)} existing tables: {existing_tables}")
-        # Check if alembic_version exists and is already at head
-        if "alembic_version" in existing_tables:
-            with engine.connect() as conn:
-                result = conn.execute(text("SELECT version_num FROM alembic_version"))
-                versions = [row[0] for row in result]
-                if versions:
-                    print(f"Alembic already stamped at: {versions}. Skipping bootstrap.")
-                    return
-        
-        # Tables exist but no alembic stamp — leftover from failed deploy
-        print("Dropping leftover tables from failed deploys...")
-        Base.metadata.drop_all(bind=engine)
-        # Also drop alembic_version if it exists
-        with engine.connect() as conn:
-            conn.execute(text("DROP TABLE IF EXISTS alembic_version"))
-            conn.commit()
-        print("All leftover tables dropped.")
-    
-    print("Creating all database tables from SQLAlchemy models...")
-    Base.metadata.create_all(bind=engine)
-    print("All database tables created successfully!")
+# Tables managed by Alembic migrations
+ALEMBIC_TABLES = {
+    "performance_benchmarks",
+    "performance_profiles",
+    "queue_metrics",
+    "audit_logs",
+    "login_attempts",
+    "security_alerts",
+    "password_histories",
+    "user_sessions",
+    "benchmark_questions",
+    "benchmark_runs",
+    "prompt_registry",
+}
 
-    # Stamp Alembic to head so it knows all migrations are "applied"
+def bootstrap():
+    mode = settings.DEPLOYMENT_MODE
+    print(f"Bootstrapping database in [{mode}] mode...")
+
+    # Drop tables logic for clean non-production bootstrap
+    if mode != "production":
+        inspector = inspect(engine)
+        existing_tables = inspector.get_table_names()
+        if existing_tables:
+            print(f"Found {len(existing_tables)} existing tables. Cleaning up...")
+            Base.metadata.drop_all(bind=engine)
+            with engine.connect() as conn:
+                conn.execute(text("DROP TABLE IF EXISTS alembic_version"))
+                conn.commit()
+            print("Cleanup complete.")
+
+    # For production and development, create base schema and run migrations
+    if mode in ("production", "development"):
+        print("Creating base tables not managed by Alembic...")
+        tables_to_create = [
+            table for name, table in Base.metadata.tables.items()
+            if name not in ALEMBIC_TABLES
+        ]
+        Base.metadata.create_all(bind=engine, tables=tables_to_create)
+        
+        print("Running Alembic head migrations...")
+        from alembic.config import Config
+        from alembic import command
+        alembic_cfg = Config("alembic.ini")
+        command.upgrade(alembic_cfg, "head")
+        print("Alembic migrations applied successfully.")
+        return
+
+    # For single and huggingface, create all tables directly and stamp head
+    print("Creating all tables from models...")
+    Base.metadata.create_all(bind=engine)
+    print("All tables created successfully.")
+
+    # Stamp Alembic to head
     from alembic.config import Config
     from alembic import command
     alembic_cfg = Config("alembic.ini")

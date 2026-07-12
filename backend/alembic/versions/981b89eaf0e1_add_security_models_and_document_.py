@@ -75,13 +75,21 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_user_sessions_session_key'), 'user_sessions', ['session_key'], unique=True)
     
-    op.add_column('documents', sa.Column('sha256', sa.String(length=64), nullable=True))
-    op.create_index(op.f('ix_documents_sha256'), 'documents', ['sha256'], unique=True)
+    conn = op.get_bind()
+    inspector = sa.inspect(conn)
     
-    # Specify server_default for non-nullable column added to existing rows
-    op.add_column('users', sa.Column('failed_login_attempts', sa.Integer(), nullable=False, server_default='0'))
-    op.add_column('users', sa.Column('locked_until', sa.DateTime(), nullable=True))
-    op.add_column('users', sa.Column('password_changed_at', sa.DateTime(), nullable=True))
+    doc_cols = [c["name"] for c in inspector.get_columns("documents")]
+    if "sha256" not in doc_cols:
+        op.add_column('documents', sa.Column('sha256', sa.String(length=64), nullable=True))
+        op.create_index(op.f('ix_documents_sha256'), 'documents', ['sha256'], unique=True)
+        
+    user_cols = [c["name"] for c in inspector.get_columns("users")]
+    if "failed_login_attempts" not in user_cols:
+        op.add_column('users', sa.Column('failed_login_attempts', sa.Integer(), nullable=False, server_default='0'))
+    if "locked_until" not in user_cols:
+        op.add_column('users', sa.Column('locked_until', sa.DateTime(), nullable=True))
+    if "password_changed_at" not in user_cols:
+        op.add_column('users', sa.Column('password_changed_at', sa.DateTime(), nullable=True))
     # ### end Alembic commands ###
 
 

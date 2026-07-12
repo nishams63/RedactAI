@@ -186,8 +186,20 @@ class FallbackOCRProvider(OCRProvider):
             page_count = 1
             text_content = "MUTUAL NON-DISCLOSURE AGREEMENT\nThis Agreement is entered into on 10th July 2026.\nBy MR. RAJESH KUMAR SHARMA, residing at Sector 15, Dwarka, New Delhi - 110075. Aadhaar: 9876 5432 1098, PAN: APSPS1234K, Phone: +91-9876543210, Email: rajesh.sharma@example.com."
         
+        from concurrent.futures import ThreadPoolExecutor
+        with ThreadPoolExecutor() as executor:
+            futures = [
+                executor.submit(self._process_page_fallback, file_content, page_idx, page_count, text_content)
+                for page_idx in range(page_count)
+            ]
+            pages_data = [f.result() for f in futures]
+
+        result = {
+            "page_count": page_count,
             "pages": pages_data
         }
+        self.cache_manager.set("ocr", file_hash, result)
+        return result
 
 
 # ─── Layout Analysis Provider ────────────────────────────────────────

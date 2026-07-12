@@ -60,7 +60,7 @@ def chat_context(request: LegalChatRequest, db: Session = Depends(get_db), curre
     return result
 
 @router.post("/analyze/{document_id}")
-def analyze_document_clauses(document_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def analyze_document_clauses(document_id: uuid.UUID, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Split document into clauses and perform privacy impact reasoning."""
     doc = db.query(Document).filter(Document.id == document_id).first()
     if not doc:
@@ -90,7 +90,7 @@ def analyze_document_clauses(document_id: str, db: Session = Depends(get_db), cu
     }
 
 @router.post("/compliance/{document_id}")
-def compliance_document(document_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def compliance_document(document_id: uuid.UUID, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Check document text against regulatory policy rules (DPDP, RBI)."""
     doc = db.query(Document).filter(Document.id == document_id).first()
     if not doc:
@@ -107,7 +107,7 @@ def compliance_document(document_id: str, db: Session = Depends(get_db), current
     return result
 
 @router.post("/summarize/{document_id}")
-def summarize_document(document_id: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+def summarize_document(document_id: uuid.UUID, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Generate risk assessment and executive privacy summaries."""
     doc = db.query(Document).filter(Document.id == document_id).first()
     if not doc:

@@ -33,13 +33,13 @@ def process_document_pipeline(self, document_id: str) -> dict:
                 document_id=doc.id,
                 job_type="FULL_PIPELINE",
                 status="RUNNING",
-                celery_task_id=self.request.id,
+                celery_task_id=getattr(self.request, "id", None) or str(uuid.uuid4()),
                 progress=0,
             )
             db.add(job)
         else:
             job.status = "RUNNING"
-            job.celery_task_id = self.request.id
+            job.celery_task_id = getattr(self.request, "id", None) or str(uuid.uuid4())
         db.commit()
 
         # Run AI Orchestrator

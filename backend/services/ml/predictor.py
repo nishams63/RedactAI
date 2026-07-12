@@ -28,7 +28,7 @@ class MLPredictor:
         self.preprocessor = DataPreprocessor()
         self.model = None
 
-    def predict_sensitivity(self, document_id: str) -> Dict[str, Any]:
+    def predict_sensitivity(self, document_id: Any) -> Dict[str, Any]:
         """
         Run inference on a single processed document.
         
@@ -37,6 +37,9 @@ class MLPredictor:
         3. Transform & predict
         4. Save prediction record to DB
         """
+        import uuid
+        if isinstance(document_id, str):
+            document_id = uuid.UUID(document_id)
         start_time = time.time()
         
         # ─── 1. Extract Features ──────────────────────────────────────────
@@ -60,7 +63,7 @@ class MLPredictor:
 
         # Predict class
         y_pred_encoded = self.model.predict(X_scaled)[0]
-        predicted_class = self.preprocessor.inverse_label(y_pred_encoded)
+        predicted_class = str(self.preprocessor.inverse_label(y_pred_encoded))
 
         # Predict probabilities
         probabilities = {}

@@ -25,7 +25,7 @@ class DLInferenceEngine:
 
     def predict_consensus(
         self,
-        document_id: str,
+        document_id: Any,
         text: str,
         dl_model_type: str = "nlpaueb/legal-bert-base-uncased",
     ) -> Dict[str, Any]:
@@ -33,6 +33,9 @@ class DLInferenceEngine:
         Runs both ML and DL pipelines, compares confidence,
         selects the consensus prediction, and stores metadata in DB.
         """
+        import uuid
+        if isinstance(document_id, str):
+            document_id = uuid.UUID(document_id)
         start_time = time.time()
         
         # 1. Get ML Prediction

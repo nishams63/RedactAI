@@ -43,7 +43,10 @@ class StorageClient:
 
     def __init__(self):
         self.bucket = settings.MINIO_BUCKET
-        self._minio_online = _minio_is_reachable(settings.MINIO_ENDPOINT)
+        if settings.DEPLOYMENT_MODE in ("single", "huggingface"):
+            self._minio_online = False
+        else:
+            self._minio_online = _minio_is_reachable(settings.MINIO_ENDPOINT)
         self.client = None
 
         if self._minio_online:

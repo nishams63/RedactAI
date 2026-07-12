@@ -25,6 +25,13 @@ logger = logging.getLogger("redactai")
 async def lifespan(app: FastAPI):
     """Application startup and shutdown lifecycle."""
     # --- Startup ---
+    import os
+    # Auto-create all required local storage directories
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    for folder in ["uploads", "reports", "cache", "models", "local_storage"]:
+        os.makedirs(os.path.join(base_dir, folder), exist_ok=True)
+    os.makedirs(os.path.join(base_dir, "local_storage", "reports"), exist_ok=True)
+
     from core.secrets_validator import validate_startup_secrets
     validate_startup_secrets()
     

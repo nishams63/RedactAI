@@ -9,6 +9,7 @@ from repositories.document import DocumentRepository
 from repositories.user import UserRepository
 from storage.s3 import storage_client, UPLOAD_PREFIX
 from models.user import User
+from core.config import settings
 
 logger = logging.getLogger("redactai.document")
 
@@ -158,18 +159,17 @@ class DocumentService:
         # Trigger async processing pipeline (CTO requirement: always Celery)
         try:
             from core.tasks import process_document_pipeline
-            # If background_tasks is provided, run asynchronously using FastAPI's background thread pool
-            # to prevent blocking the HTTP response thread when Celery is in eager mode
-            if background_tasks:
+            # If in single/huggingface mode or background_tasks is supplied, run synchronously/locally
+            if settings.DEPLOYMENT_MODE in ("single", "huggingface") or background_tasks:
                 def run_sync_wrapper(doc_id_str: str):
-                    class DummyRequest:
-                        id = "sync-task"
-                    class DummySelf:
-                        request = DummyRequest()
-                    process_document_pipeline(DummySelf(), doc_id_str)
+                    process_document_pipeline(doc_id_str)
                     
-                background_tasks.add_task(run_sync_wrapper, str(doc_id))
-                logger.info(f"Processing pipeline dispatched via BackgroundTasks for document {doc_id}")
+                if background_tasks:
+                    background_tasks.add_task(run_sync_wrapper, str(doc_id))
+                    logger.info(f"Processing pipeline dispatched via BackgroundTasks for document {doc_id}")
+                else:
+                    run_sync_wrapper(str(doc_id))
+                    logger.info(f"Processing pipeline executed synchronously for document {doc_id}")
             else:
                 process_document_pipeline.delay(str(doc_id))
                 logger.info(f"Processing pipeline triggered asynchronously via Celery for document {doc_id}")

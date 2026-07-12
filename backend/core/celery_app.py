@@ -4,8 +4,8 @@ from core.config import settings
 
 celery_app = Celery(
     "redactai",
-    broker=settings.REDIS_URL,
-    backend=settings.REDIS_URL,
+    broker=settings.REDIS_URL if settings.REDIS_URL else "memory://",
+    backend=settings.REDIS_URL if settings.REDIS_URL else "cache+memory://",
     include=["core.tasks"],
 )
 

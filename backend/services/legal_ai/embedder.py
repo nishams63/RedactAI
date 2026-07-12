@@ -2,7 +2,10 @@
 import os
 import hashlib
 import numpy as np
-import torch
+try:
+    import torch
+except ImportError:
+    torch = None
 from typing import List
 from services.legal_ai.cache_manager import CacheManager
 
@@ -14,6 +17,10 @@ class LocalSentenceEmbedder:
 
     def _load_model(self):
         """Attempts to load transformers model. Falls back gracefully if offline."""
+        if torch is None:
+            print("Torch is not installed. Using local sentence embedder fallback.")
+            self.use_fallback = True
+            return
         try:
             from transformers import AutoTokenizer, AutoModel
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
