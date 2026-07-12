@@ -1,0 +1,302 @@
+[
+  {
+    "question": "What is the notice requirement for personal data processing under DPDP?",
+    "expected_source": "DPDP Act",
+    "expected_section": "Section 5",
+    "keywords": ["notice", "consent", "purpose"]
+  },
+  {
+    "question": "What are the obligations of data fiduciaries under the DPDP Act?",
+    "expected_source": "DPDP Act",
+    "expected_section": "Section 4",
+    "keywords": ["process", "lawful", "legitimate"]
+  },
+  {
+    "question": "How should personal data of children be processed according to DPDP?",
+    "expected_source": "DPDP Act",
+    "expected_section": "Section 9",
+    "keywords": ["child", "verifiable consent", "parental"]
+  },
+  {
+    "question": "What is the penalty for disclosing personal information without consent under the IT Act?",
+    "expected_source": "IT Act 2000",
+    "expected_section": "Section 72A",
+    "keywords": ["disclosure", "imprisonment", "fine", "consent"]
+  },
+  {
+    "question": "What is the penalty for failing to protect sensitive personal data under IT Act Section 43A?",
+    "expected_source": "IT Act 2000",
+    "expected_section": "Section 43A",
+    "keywords": ["compensation", "negligence", "reasonable security practices"]
+  },
+  {
+    "question": "What are the storage guidelines for Aadhaar numbers issued by UIDAI?",
+    "expected_source": "UIDAI Guidelines",
+    "expected_section": "Section 3.2",
+    "keywords": ["mask", "storage", "vault", "last 4 digits"]
+  },
+  {
+    "question": "What is the Aadhaar Data Vault requirement?",
+    "expected_source": "UIDAI Guidelines",
+    "expected_section": "Section 4.1",
+    "keywords": ["vault", "reference key", "hsm"]
+  },
+  {
+    "question": "What officially valid documents are required for RBI KYC verification?",
+    "expected_source": "RBI KYC Guidelines",
+    "expected_section": "Section 10",
+    "keywords": ["kyc", "pan", "ovd", "passport", "aadhaar"]
+  },
+  {
+    "question": "What is the RBI rule on third party customer data sharing?",
+    "expected_source": "RBI KYC Guidelines",
+    "expected_section": "Section 45",
+    "keywords": ["confidential", "disclose", "consent exception"]
+  },
+  {
+    "question": "Are confidentiality clauses in Non-Disclosure Agreements valid in India?",
+    "expected_source": "Indian Contract Act",
+    "expected_section": "Section 27",
+    "keywords": ["nda", "void", "confidentiality", "trade secrets"]
+  },
+  {
+    "question": "What are company rules for IP and NDAs under internal compliance?",
+    "expected_source": "Company Privacy Policy",
+    "expected_section": "Rule 12",
+    "keywords": ["confidentiality", "employee", "contractor", "networks"]
+  },
+  {
+    "question": "What is the company data retention policy for customer PII?",
+    "expected_source": "Company Privacy Policy",
+    "expected_section": "Rule 15",
+    "keywords": ["minimization", "180 days", "retention", "deletion"]
+  },
+  {
+    "question": "How does the DPDP Act define a Data Principal?",
+    "expected_source": "DPDP Act",
+    "expected_section": "Section 4",
+    "keywords": ["principal", "consent", "legitimate"]
+  },
+  {
+    "question": "How does the DPDP Act define a Data Fiduciary?",
+    "expected_source": "DPDP Act",
+    "expected_section": "Section 4",
+    "keywords": ["fiduciary", "process", "obligation"]
+  },
+  {
+    "question": "What is legitimate use under the DPDP Act?",
+    "expected_source": "DPDP Act",
+    "expected_section": "Section 4",
+    "keywords": ["legitimate", "lawful", "consent"]
+  },
+  {
+    "question": "What notices must accompany a request for consent under DPDP Section 5?",
+    "expected_source": "DPDP Act",
+    "expected_section": "Section 5",
+    "keywords": ["notice", "consent", "purpose", "rights"]
+  },
+  {
+    "question": "Does DPDP require parental consent for children's data?",
+    "expected_source": "DPDP Act",
+    "expected_section": "Section 9",
+    "keywords": ["parent", "consent", "child"]
+  },
+  {
+    "question": "What does Section 72A of the IT Act say about disclosure of personal information?",
+    "expected_source": "IT Act 2000",
+    "expected_section": "Section 72A",
+    "keywords": ["disclosure", "consent", "breach of contract"]
+  },
+  {
+    "question": "Is negligence punishable under IT Act Section 43A?",
+    "expected_source": "IT Act 2000",
+    "expected_section": "Section 43A",
+    "keywords": ["negligence", "compensation", "sensitive personal data"]
+  },
+  {
+    "question": "How many digits of the Aadhaar number must be masked?",
+    "expected_source": "UIDAI Guidelines",
+    "expected_section": "Section 3.2",
+    "keywords": ["mask", "first 8 digits", "last 4 digits"]
+  },
+  {
+    "question": "Where should Aadhaar numbers be stored according to UIDAI?",
+    "expected_source": "UIDAI Guidelines",
+    "expected_section": "Section 4.1",
+    "keywords": ["vault", "storage", "secure database"]
+  },
+  {
+    "question": "Which RBI guideline mandates obtaining a PAN card?",
+    "expected_source": "RBI KYC Guidelines",
+    "expected_section": "Section 10",
+    "keywords": ["pan", "kyc", "onboarding"]
+  },
+  {
+    "question": "Does the RBI allow third party customer data sharing without consent?",
+    "expected_source": "RBI KYC Guidelines",
+    "expected_section": "Section 45",
+    "keywords": ["confidential", "third party", "consent"]
+  },
+  {
+    "question": "Is restraint of trade void under Indian Contract Act Section 27?",
+    "expected_source": "Indian Contract Act",
+    "expected_section": "Section 27",
+    "keywords": ["restraint", "void", "confidentiality"]
+  },
+  {
+    "question": "Are trade secrets protected under confidentiality agreements?",
+    "expected_source": "Indian Contract Act",
+    "expected_section": "Section 27",
+    "keywords": ["confidentiality", "trade secrets", "valid"]
+  },
+  {
+    "question": "Can personal information of customers be stored on personal drives under internal compliance?",
+    "expected_source": "Company Privacy Policy",
+    "expected_section": "Rule 12",
+    "keywords": ["personal drive", "extract", "customer"]
+  },
+  {
+    "question": "What is the retention limit post service contract termination under company policy?",
+    "expected_source": "Company Privacy Policy",
+    "expected_section": "Rule 15",
+    "keywords": ["180 days", "retention", "termination"]
+  },
+  {
+    "question": "Does DPDP Act consent need to be specific and unconditional?",
+    "expected_source": "DPDP Act",
+    "expected_section": "Section 4",
+    "keywords": ["lawful", "consent", "lawful purpose"]
+  },
+  {
+    "question": "What rights are defined for Data Principals under DPDP Section 5?",
+    "expected_source": "DPDP Act",
+    "expected_section": "Section 5",
+    "keywords": ["notice", "rights", "exercise"]
+  },
+  {
+    "question": "Is processing child's data for target marketing allowed under DPDP Section 9?",
+    "expected_source": "DPDP Act",
+    "expected_section": "Section 9",
+    "keywords": ["child", "harmful", "well-being"]
+  },
+  {
+    "question": "What is the maximum imprisonment term under Section 72A of the IT Act?",
+    "expected_source": "IT Act 2000",
+    "expected_section": "Section 72A",
+    "keywords": ["imprisonment", "three years", "disclosure"]
+  },
+  {
+    "question": "What is the maximum fine amount under Section 72A of the IT Act?",
+    "expected_source": "IT Act 2000",
+    "expected_section": "Section 72A",
+    "keywords": ["five lakh rupees", "fine", "disclosure"]
+  },
+  {
+    "question": "Which body corporate is liable to pay damages under IT Act Section 43A?",
+    "expected_source": "IT Act 2000",
+    "expected_section": "Section 43A",
+    "keywords": ["body corporate", "negligence", "compensation"]
+  },
+  {
+    "question": "What replacement character is specified for Aadhaar masking?",
+    "expected_source": "UIDAI Guidelines",
+    "expected_section": "Section 3.2",
+    "keywords": ["mask", "asterisks", "first 8 digits"]
+  },
+  {
+    "question": "What is an HSM in the context of Aadhaar vault storage?",
+    "expected_source": "UIDAI Guidelines",
+    "expected_section": "Section 4.1",
+    "keywords": ["hsm", "encryption", "vault"]
+  },
+  {
+    "question": "What officially valid documents (OVD) does the RBI accept for KYC?",
+    "expected_source": "RBI KYC Guidelines",
+    "expected_section": "Section 10",
+    "keywords": ["ovd", "passport", "voter id", "driving license"]
+  },
+  {
+    "question": "What is the regulatory audit exception for RBI data sharing?",
+    "expected_source": "RBI KYC Guidelines",
+    "expected_section": "Section 45",
+    "keywords": ["regulatory audit", "disclose", "confidentiality"]
+  },
+  {
+    "question": "Does Section 27 of the Indian Contract Act make non-disclosure clauses void?",
+    "expected_source": "Indian Contract Act",
+    "expected_section": "Section 27",
+    "keywords": ["confidentiality", "void", "valid"]
+  },
+  {
+    "question": "Are confidentiality obligations mandatory for all employee contracts?",
+    "expected_source": "Company Privacy Policy",
+    "expected_section": "Rule 12",
+    "keywords": ["confidentiality", "employee", "contract"]
+  },
+  {
+    "question": "Must customer PII be deleted after 180 days according to internal rules?",
+    "expected_source": "Company Privacy Policy",
+    "expected_section": "Rule 15",
+    "keywords": ["delete", "180 days", "PII"]
+  },
+  {
+    "question": "What is the legal framework for processing personal data in India?",
+    "expected_source": "DPDP Act",
+    "expected_section": "Section 4",
+    "keywords": ["process", "personal data", "DPDP"]
+  },
+  {
+    "question": "How can a Data Principal withdraw consent under DPDP?",
+    "expected_source": "DPDP Act",
+    "expected_section": "Section 5",
+    "keywords": ["withdraw", "consent", "notice"]
+  },
+  {
+    "question": "What parental check is required before processing child's PII?",
+    "expected_source": "DPDP Act",
+    "expected_section": "Section 9",
+    "keywords": ["verifiable consent", "parent", "child"]
+  },
+  {
+    "question": "What is the penalty for unauthorized disclosure of personal info by intermediaries?",
+    "expected_source": "IT Act 2000",
+    "expected_section": "Section 72A",
+    "keywords": ["disclosure", "penalty", "intermediary"]
+  },
+  {
+    "question": "What security procedures are required under Section 43A of the IT Act?",
+    "expected_source": "IT Act 2000",
+    "expected_section": "Section 43A",
+    "keywords": ["reasonable security practices", "negligence", "compensation"]
+  },
+  {
+    "question": "Are database logs required to show masked Aadhaar numbers?",
+    "expected_source": "UIDAI Guidelines",
+    "expected_section": "Section 3.2",
+    "keywords": ["mask", "database logs", "asterisks"]
+  },
+  {
+    "question": "How is the Aadhaar vault separated from transactional databases?",
+    "expected_source": "UIDAI Guidelines",
+    "expected_section": "Section 4.1",
+    "keywords": ["separated", "vault", "transactional"]
+  },
+  {
+    "question": "Is Form 60 accepted for RBI customer verification?",
+    "expected_source": "RBI KYC Guidelines",
+    "expected_section": "Section 10",
+    "keywords": ["Form 60", "kyc", "customer identification"]
+  },
+  {
+    "question": "Can customer details be shared for court decrees under RBI rules?",
+    "expected_source": "RBI KYC Guidelines",
+    "expected_section": "Section 45",
+    "keywords": ["court decrees", "disclose", "confidentiality"]
+  },
+  {
+    "question": "Are NDA confidentiality restraints enforceable under Indian law?",
+    "expected_source": "Indian Contract Act",
+    "expected_section": "Section 27",
+    "keywords": ["confidentiality", "NDA", "enforce"]
+  }
+]

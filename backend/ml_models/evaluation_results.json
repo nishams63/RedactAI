@@ -1,0 +1,1247 @@
+{
+  "best_model": "RandomForest",
+  "dataset_metadata": {
+    "total_samples": 5000,
+    "train_samples": 4000,
+    "test_samples": 1000,
+    "feature_count": 54,
+    "missing_values_imputed": 0,
+    "outliers_capped": 559,
+    "test_size": 0.2,
+    "random_seed": 42,
+    "classes": [
+      "Public",
+      "Internal",
+      "Confidential",
+      "Highly Confidential"
+    ]
+  },
+  "models": {
+    "LogisticRegression": {
+      "version": "v1.0.0-logisticregression",
+      "best_params": {
+        "C": 1.0,
+        "max_iter": 500,
+        "solver": "lbfgs"
+      },
+      "metrics": {
+        "accuracy": 0.898,
+        "precision_macro": 0.8888419239738015,
+        "recall_macro": 0.8670241531358338,
+        "f1_macro": 0.877320130689928,
+        "roc_auc": 0.9816975115033233
+      },
+      "performance": {
+        "training_time_seconds": 12.790192127227783,
+        "inference_time_ms_per_sample": 0.0016140937805175781
+      },
+      "confusion_matrix": [
+        [
+          437,
+          32,
+          4,
+          0
+        ],
+        [
+          39,
+          355,
+          1,
+          2
+        ],
+        [
+          15,
+          0,
+          72,
+          3
+        ],
+        [
+          1,
+          0,
+          5,
+          34
+        ]
+      ],
+      "classification_report": {
+        "Public": {
+          "precision": 0.8882113821138211,
+          "recall": 0.9238900634249472,
+          "f1-score": 0.9056994818652849,
+          "support": 473.0
+        },
+        "Internal": {
+          "precision": 0.917312661498708,
+          "recall": 0.8942065491183879,
+          "f1-score": 0.9056122448979592,
+          "support": 397.0
+        },
+        "Confidential": {
+          "precision": 0.8780487804878049,
+          "recall": 0.8,
+          "f1-score": 0.8372093023255814,
+          "support": 90.0
+        },
+        "Highly Confidential": {
+          "precision": 0.8717948717948718,
+          "recall": 0.85,
+          "f1-score": 0.8607594936708861,
+          "support": 40.0
+        },
+        "accuracy": 0.898,
+        "macro avg": {
+          "precision": 0.8888419239738015,
+          "recall": 0.8670241531358338,
+          "f1-score": 0.877320130689928,
+          "support": 1000.0
+        },
+        "weighted avg": {
+          "precision": 0.8981932954705218,
+          "recall": 0.898,
+          "f1-score": 0.8977031331029075,
+          "support": 1000.0
+        }
+      },
+      "cv_scores": [
+        0.8721775401068859
+      ],
+      "feature_importance": [
+        [
+          "address_count",
+          1.6698270258903576
+        ],
+        [
+          "image_count",
+          1.530143200394334
+        ],
+        [
+          "contains_gov_id",
+          1.325720528293115
+        ],
+        [
+          "passport_count",
+          1.2732893891951071
+        ],
+        [
+          "phone_count",
+          1.1647998721691923
+        ],
+        [
+          "critical_count",
+          1.0810915340351572
+        ],
+        [
+          "judge_count",
+          1.0350703494075681
+        ],
+        [
+          "critical_ratio",
+          0.9759564676190718
+        ],
+        [
+          "upi_count",
+          0.9671074828177528
+        ],
+        [
+          "email_count",
+          0.877415436601054
+        ],
+        [
+          "document_type_encoded",
+          0.7951026902525302
+        ],
+        [
+          "signature_count",
+          0.7716445612401793
+        ],
+        [
+          "high_count",
+          0.7638989763678048
+        ],
+        [
+          "credit_card_count",
+          0.7178604049848347
+        ],
+        [
+          "aadhaar_count",
+          0.6736717596079455
+        ],
+        [
+          "court_count",
+          0.6192472149779193
+        ],
+        [
+          "contains_legal_terms",
+          0.6122955572672697
+        ],
+        [
+          "contains_financial_data",
+          0.6046891631706071
+        ],
+        [
+          "bank_account_count",
+          0.5681154019726281
+        ],
+        [
+          "location_count",
+          0.5330273253477749
+        ],
+        [
+          "law_count",
+          0.5119537588849343
+        ],
+        [
+          "pii_density",
+          0.49800895678137624
+        ],
+        [
+          "pan_count",
+          0.45581032947901623
+        ],
+        [
+          "table_count",
+          0.4365233420736016
+        ],
+        [
+          "total_characters",
+          0.4168027621044156
+        ],
+        [
+          "total_words",
+          0.415619382264487
+        ],
+        [
+          "avg_pii_per_page",
+          0.39557316262032527
+        ],
+        [
+          "doc_length_category",
+          0.3947769432950351
+        ],
+        [
+          "low_count",
+          0.3552659675829989
+        ],
+        [
+          "stamp_count",
+          0.3532011741092993
+        ],
+        [
+          "ifsc_count",
+          0.3452446208802141
+        ],
+        [
+          "date_count",
+          0.3380662881565223
+        ],
+        [
+          "header_count",
+          0.31131694023876366
+        ],
+        [
+          "case_number_count",
+          0.2965858568832608
+        ],
+        [
+          "money_count",
+          0.2935619984157336
+        ],
+        [
+          "entity_density",
+          0.2500025290521361
+        ],
+        [
+          "medium_count",
+          0.22573878395503547
+        ],
+        [
+          "avg_confidence",
+          0.21063004008853017
+        ],
+        [
+          "num_pages",
+          0.20124451689064926
+        ],
+        [
+          "avg_entities_per_page",
+          0.19261009590797135
+        ],
+        [
+          "footer_count",
+          0.18759743277051988
+        ],
+        [
+          "has_digital_signature",
+          0.17652290700752843
+        ],
+        [
+          "voter_id_count",
+          0.15240068508529905
+        ],
+        [
+          "person_count",
+          0.1471703895003614
+        ],
+        [
+          "risk_density",
+          0.13340988020933114
+        ],
+        [
+          "has_author",
+          0.12659842798099477
+        ],
+        [
+          "max_confidence",
+          0.12309863397116594
+        ],
+        [
+          "org_count",
+          0.06991515155390746
+        ],
+        [
+          "has_producer",
+          0.06755694694893054
+        ],
+        [
+          "avg_sentence_length",
+          0.057732639457924825
+        ],
+        [
+          "language_encoded",
+          0.04781726101742407
+        ],
+        [
+          "driving_license_count",
+          0.0
+        ],
+        [
+          "is_encrypted",
+          0.0
+        ],
+        [
+          "contains_personal_data",
+          0.0
+        ]
+      ]
+    },
+    "RandomForest": {
+      "version": "v1.0.0-randomforest",
+      "best_params": {
+        "max_depth": null,
+        "min_samples_leaf": 1,
+        "min_samples_split": 2,
+        "n_estimators": 100
+      },
+      "metrics": {
+        "accuracy": 0.942,
+        "precision_macro": 0.9367609674929022,
+        "recall_macro": 0.8823928428151233,
+        "f1_macro": 0.906659961168158,
+        "roc_auc": 0.9960784729054311
+      },
+      "performance": {
+        "training_time_seconds": 15.709259510040283,
+        "inference_time_ms_per_sample": 0.10247635841369629
+      },
+      "confusion_matrix": [
+        [
+          456,
+          16,
+          1,
+          0
+        ],
+        [
+          17,
+          380,
+          0,
+          0
+        ],
+        [
+          14,
+          0,
+          75,
+          1
+        ],
+        [
+          0,
+          0,
+          9,
+          31
+        ]
+      ],
+      "classification_report": {
+        "Public": {
+          "precision": 0.9363449691991786,
+          "recall": 0.9640591966173362,
+          "f1-score": 0.95,
+          "support": 473.0
+        },
+        "Internal": {
+          "precision": 0.9595959595959596,
+          "recall": 0.9571788413098237,
+          "f1-score": 0.9583858764186634,
+          "support": 397.0
+        },
+        "Confidential": {
+          "precision": 0.8823529411764706,
+          "recall": 0.8333333333333334,
+          "f1-score": 0.8571428571428571,
+          "support": 90.0
+        },
+        "Highly Confidential": {
+          "precision": 0.96875,
+          "recall": 0.775,
+          "f1-score": 0.8611111111111112,
+          "support": 40.0
+        },
+        "accuracy": 0.942,
+        "macro avg": {
+          "precision": 0.9367609674929022,
+          "recall": 0.8823928428151233,
+          "f1-score": 0.906659961168158,
+          "support": 1000.0
+        },
+        "weighted avg": {
+          "precision": 0.9420125310966897,
+          "recall": 0.942,
+          "f1-score": 0.9414164945255109,
+          "support": 1000.0
+        }
+      },
+      "cv_scores": [
+        0.9091091099896161,
+        0.920974440281291
+      ],
+      "feature_importance": [
+        [
+          "document_type_encoded",
+          0.11663673074569018
+        ],
+        [
+          "critical_ratio",
+          0.07009120584484094
+        ],
+        [
+          "critical_count",
+          0.06921357641979203
+        ],
+        [
+          "pii_density",
+          0.06042784596647679
+        ],
+        [
+          "high_count",
+          0.04228828739084891
+        ],
+        [
+          "avg_pii_per_page",
+          0.03029858230124209
+        ],
+        [
+          "contains_gov_id",
+          0.029893205203588402
+        ],
+        [
+          "law_count",
+          0.029566452182240344
+        ],
+        [
+          "address_count",
+          0.028161871101434564
+        ],
+        [
+          "court_count",
+          0.026773848403245953
+        ],
+        [
+          "aadhaar_count",
+          0.02440697528421065
+        ],
+        [
+          "total_words",
+          0.02435455747758166
+        ],
+        [
+          "medium_count",
+          0.023996514217243324
+        ],
+        [
+          "judge_count",
+          0.02371258631388456
+        ],
+        [
+          "bank_account_count",
+          0.022957384041490298
+        ],
+        [
+          "email_count",
+          0.02224955387135993
+        ],
+        [
+          "date_count",
+          0.0189350821582433
+        ],
+        [
+          "pan_count",
+          0.018088501884947986
+        ],
+        [
+          "contains_legal_terms",
+          0.01747202321711812
+        ],
+        [
+          "total_characters",
+          0.01689974639413776
+        ],
+        [
+          "low_count",
+          0.016590452081032502
+        ],
+        [
+          "case_number_count",
+          0.016475243705180595
+        ],
+        [
+          "phone_count",
+          0.01626678858562786
+        ],
+        [
+          "entity_density",
+          0.016039405351607503
+        ],
+        [
+          "money_count",
+          0.015651615501238017
+        ],
+        [
+          "risk_density",
+          0.014839417781247756
+        ],
+        [
+          "ifsc_count",
+          0.013586751212041807
+        ],
+        [
+          "passport_count",
+          0.013586512768340048
+        ],
+        [
+          "avg_entities_per_page",
+          0.012633909151802562
+        ],
+        [
+          "stamp_count",
+          0.012518885381377999
+        ],
+        [
+          "num_pages",
+          0.011900991330787364
+        ],
+        [
+          "avg_confidence",
+          0.011437626834131989
+        ],
+        [
+          "signature_count",
+          0.010471813814176431
+        ],
+        [
+          "avg_sentence_length",
+          0.009915462486530803
+        ],
+        [
+          "contains_financial_data",
+          0.009370236983465296
+        ],
+        [
+          "max_confidence",
+          0.008533122082497329
+        ],
+        [
+          "table_count",
+          0.007736373846552891
+        ],
+        [
+          "location_count",
+          0.007062912048719691
+        ],
+        [
+          "header_count",
+          0.006933301939034562
+        ],
+        [
+          "org_count",
+          0.006047269492000506
+        ],
+        [
+          "footer_count",
+          0.005888003959907521
+        ],
+        [
+          "person_count",
+          0.005850502952859144
+        ],
+        [
+          "doc_length_category",
+          0.005687781355588695
+        ],
+        [
+          "voter_id_count",
+          0.005602927271697542
+        ],
+        [
+          "credit_card_count",
+          0.005448727385197469
+        ],
+        [
+          "upi_count",
+          0.005437723392893327
+        ],
+        [
+          "image_count",
+          0.004211350285431478
+        ],
+        [
+          "language_encoded",
+          0.0025138667658400186
+        ],
+        [
+          "has_digital_signature",
+          0.002065638760088415
+        ],
+        [
+          "has_author",
+          0.001676878525555789
+        ],
+        [
+          "has_producer",
+          0.0015939765479293694
+        ],
+        [
+          "driving_license_count",
+          0.0
+        ],
+        [
+          "is_encrypted",
+          0.0
+        ],
+        [
+          "contains_personal_data",
+          0.0
+        ]
+      ]
+    },
+    "GradientBoosting": {
+      "version": "v1.0.0-gradientboosting",
+      "best_params": {
+        "learning_rate": 0.1,
+        "max_depth": 3,
+        "min_samples_split": 2,
+        "n_estimators": 100
+      },
+      "metrics": {
+        "accuracy": 0.944,
+        "precision_macro": 0.9322788237813346,
+        "recall_macro": 0.8812006887159923,
+        "f1_macro": 0.9038714398954867,
+        "roc_auc": 0.9951556759720761
+      },
+      "performance": {
+        "training_time_seconds": 27.174171209335327,
+        "inference_time_ms_per_sample": 0.028107404708862305
+      },
+      "confusion_matrix": [
+        [
+          459,
+          9,
+          5,
+          0
+        ],
+        [
+          17,
+          380,
+          0,
+          0
+        ],
+        [
+          15,
+          0,
+          74,
+          1
+        ],
+        [
+          1,
+          0,
+          8,
+          31
+        ]
+      ],
+      "classification_report": {
+        "Public": {
+          "precision": 0.9329268292682927,
+          "recall": 0.9704016913319239,
+          "f1-score": 0.9512953367875647,
+          "support": 473.0
+        },
+        "Internal": {
+          "precision": 0.9768637532133676,
+          "recall": 0.9571788413098237,
+          "f1-score": 0.9669211195928753,
+          "support": 397.0
+        },
+        "Confidential": {
+          "precision": 0.8505747126436781,
+          "recall": 0.8222222222222222,
+          "f1-score": 0.8361581920903954,
+          "support": 90.0
+        },
+        "Highly Confidential": {
+          "precision": 0.96875,
+          "recall": 0.775,
+          "f1-score": 0.8611111111111112,
+          "support": 40.0
+        },
+        "accuracy": 0.944,
+        "macro avg": {
+          "precision": 0.9322788237813346,
+          "recall": 0.8812006887159923,
+          "f1-score": 0.9038714398954867,
+          "support": 1000.0
+        },
+        "weighted avg": {
+          "precision": 0.9443910244075404,
+          "recall": 0.944,
+          "f1-score": 0.9435290605114696,
+          "support": 1000.0
+        }
+      },
+      "cv_scores": [
+        0.921444682055807
+      ],
+      "feature_importance": [
+        [
+          "document_type_encoded",
+          0.33695773929454326
+        ],
+        [
+          "critical_count",
+          0.14521577355582962
+        ],
+        [
+          "critical_ratio",
+          0.13524166767167883
+        ],
+        [
+          "pii_density",
+          0.08728045027679049
+        ],
+        [
+          "high_count",
+          0.04402258341516237
+        ],
+        [
+          "judge_count",
+          0.03524487713406123
+        ],
+        [
+          "address_count",
+          0.02997272752384692
+        ],
+        [
+          "signature_count",
+          0.026634568530835765
+        ],
+        [
+          "avg_pii_per_page",
+          0.017555753088974276
+        ],
+        [
+          "contains_gov_id",
+          0.01619207496911061
+        ],
+        [
+          "total_words",
+          0.014639642040827289
+        ],
+        [
+          "court_count",
+          0.012925720094481424
+        ],
+        [
+          "aadhaar_count",
+          0.010214814681995095
+        ],
+        [
+          "contains_financial_data",
+          0.008391938503300327
+        ],
+        [
+          "money_count",
+          0.008228502323967147
+        ],
+        [
+          "contains_legal_terms",
+          0.008110610022006828
+        ],
+        [
+          "location_count",
+          0.0061843058356739426
+        ],
+        [
+          "passport_count",
+          0.005544881582862526
+        ],
+        [
+          "bank_account_count",
+          0.004484152635322767
+        ],
+        [
+          "stamp_count",
+          0.0044154597728108275
+        ],
+        [
+          "medium_count",
+          0.004246574306061777
+        ],
+        [
+          "total_characters",
+          0.004014027551520506
+        ],
+        [
+          "num_pages",
+          0.00396477998373116
+        ],
+        [
+          "phone_count",
+          0.0037120375712209105
+        ],
+        [
+          "voter_id_count",
+          0.0036729213728289778
+        ],
+        [
+          "ifsc_count",
+          0.003528752365087119
+        ],
+        [
+          "low_count",
+          0.002350155937621476
+        ],
+        [
+          "avg_entities_per_page",
+          0.002262290632856165
+        ],
+        [
+          "person_count",
+          0.0019424210689415315
+        ],
+        [
+          "avg_confidence",
+          0.0015892392653234623
+        ],
+        [
+          "email_count",
+          0.0014112762792135392
+        ],
+        [
+          "pan_count",
+          0.0013806360708106349
+        ],
+        [
+          "avg_sentence_length",
+          0.0013782021350418115
+        ],
+        [
+          "date_count",
+          0.001109567595244714
+        ],
+        [
+          "image_count",
+          0.0010953719372971643
+        ],
+        [
+          "risk_density",
+          0.0007461540491573744
+        ],
+        [
+          "header_count",
+          0.0006692528256239293
+        ],
+        [
+          "case_number_count",
+          0.0005919217553245031
+        ],
+        [
+          "law_count",
+          0.0005766830057082142
+        ],
+        [
+          "max_confidence",
+          0.0005399064680055066
+        ],
+        [
+          "entity_density",
+          0.0005036860643623055
+        ],
+        [
+          "table_count",
+          0.00022790747145188503
+        ],
+        [
+          "credit_card_count",
+          0.00022621109656901156
+        ],
+        [
+          "has_digital_signature",
+          0.00022161359408737826
+        ],
+        [
+          "upi_count",
+          0.00019631881962864337
+        ],
+        [
+          "footer_count",
+          0.00014693214230244677
+        ],
+        [
+          "language_encoded",
+          7.871975747587468e-05
+        ],
+        [
+          "org_count",
+          5.712805343290621e-05
+        ],
+        [
+          "has_author",
+          5.4790310345372294e-05
+        ],
+        [
+          "has_producer",
+          2.6333913759444266e-05
+        ],
+        [
+          "doc_length_category",
+          1.9943645882695348e-05
+        ],
+        [
+          "driving_license_count",
+          0.0
+        ],
+        [
+          "is_encrypted",
+          0.0
+        ],
+        [
+          "contains_personal_data",
+          0.0
+        ]
+      ]
+    },
+    "XGBoost": {
+      "version": "v1.0.0-xgboost",
+      "best_params": {
+        "colsample_bytree": 1.0,
+        "learning_rate": 0.1,
+        "max_depth": 3,
+        "n_estimators": 100,
+        "subsample": 1.0
+      },
+      "metrics": {
+        "accuracy": 0.944,
+        "precision_macro": 0.9331994488419156,
+        "recall_macro": 0.8766010339171694,
+        "f1_macro": 0.902155429918606,
+        "roc_auc": 0.9957486448312952
+      },
+      "performance": {
+        "training_time_seconds": 2.9852700233459473,
+        "inference_time_ms_per_sample": 0.008398056030273438
+      },
+      "confusion_matrix": [
+        [
+          462,
+          9,
+          2,
+          0
+        ],
+        [
+          18,
+          379,
+          0,
+          0
+        ],
+        [
+          16,
+          0,
+          72,
+          2
+        ],
+        [
+          2,
+          0,
+          7,
+          31
+        ]
+      ],
+      "classification_report": {
+        "Public": {
+          "precision": 0.927710843373494,
+          "recall": 0.9767441860465116,
+          "f1-score": 0.9515962924819773,
+          "support": 473.0
+        },
+        "Internal": {
+          "precision": 0.9768041237113402,
+          "recall": 0.9546599496221663,
+          "f1-score": 0.9656050955414013,
+          "support": 397.0
+        },
+        "Confidential": {
+          "precision": 0.8888888888888888,
+          "recall": 0.8,
+          "f1-score": 0.8421052631578947,
+          "support": 90.0
+        },
+        "Highly Confidential": {
+          "precision": 0.9393939393939394,
+          "recall": 0.775,
+          "f1-score": 0.8493150684931506,
+          "support": 40.0
+        },
+        "accuracy": 0.944,
+        "macro avg": {
+          "precision": 0.9331994488419156,
+          "recall": 0.8766010339171694,
+          "f1-score": 0.902155429918606,
+          "support": 1000.0
+        },
+        "weighted avg": {
+          "precision": 0.9441742236048223,
+          "recall": 0.944,
+          "f1-score": 0.9432123456978482,
+          "support": 1000.0
+        }
+      },
+      "cv_scores": [
+        0.9185538294274874
+      ],
+      "feature_importance": [
+        [
+          "court_count",
+          0.0992102101445198
+        ],
+        [
+          "judge_count",
+          0.09861913323402405
+        ],
+        [
+          "critical_count",
+          0.08428536355495453
+        ],
+        [
+          "document_type_encoded",
+          0.07070142030715942
+        ],
+        [
+          "signature_count",
+          0.05161210894584656
+        ],
+        [
+          "contains_gov_id",
+          0.050433769822120667
+        ],
+        [
+          "pii_density",
+          0.048899296671152115
+        ],
+        [
+          "aadhaar_count",
+          0.04159674793481827
+        ],
+        [
+          "contains_legal_terms",
+          0.031121930107474327
+        ],
+        [
+          "passport_count",
+          0.030530722811818123
+        ],
+        [
+          "high_count",
+          0.026937952265143394
+        ],
+        [
+          "critical_ratio",
+          0.02693658322095871
+        ],
+        [
+          "avg_pii_per_page",
+          0.02524224855005741
+        ],
+        [
+          "address_count",
+          0.023324448615312576
+        ],
+        [
+          "table_count",
+          0.021433308720588684
+        ],
+        [
+          "location_count",
+          0.01866510510444641
+        ],
+        [
+          "email_count",
+          0.017575519159436226
+        ],
+        [
+          "bank_account_count",
+          0.017437029629945755
+        ],
+        [
+          "image_count",
+          0.01734902150928974
+        ],
+        [
+          "stamp_count",
+          0.016289373859763145
+        ],
+        [
+          "phone_count",
+          0.015333187766373158
+        ],
+        [
+          "ifsc_count",
+          0.014774034731090069
+        ],
+        [
+          "contains_financial_data",
+          0.014585934579372406
+        ],
+        [
+          "money_count",
+          0.014058190397918224
+        ],
+        [
+          "total_words",
+          0.012526167556643486
+        ],
+        [
+          "num_pages",
+          0.010072038508951664
+        ],
+        [
+          "voter_id_count",
+          0.009758509695529938
+        ],
+        [
+          "medium_count",
+          0.008674947544932365
+        ],
+        [
+          "pan_count",
+          0.008142523467540741
+        ],
+        [
+          "total_characters",
+          0.007964072749018669
+        ],
+        [
+          "law_count",
+          0.007508486043661833
+        ],
+        [
+          "low_count",
+          0.006957557518035173
+        ],
+        [
+          "has_digital_signature",
+          0.0068216449581086636
+        ],
+        [
+          "date_count",
+          0.006114978808909655
+        ],
+        [
+          "header_count",
+          0.005445071030408144
+        ],
+        [
+          "has_author",
+          0.004282429348677397
+        ],
+        [
+          "risk_density",
+          0.003957370761781931
+        ],
+        [
+          "person_count",
+          0.0039480309933424
+        ],
+        [
+          "avg_entities_per_page",
+          0.0039011177141219378
+        ],
+        [
+          "case_number_count",
+          0.003215319011360407
+        ],
+        [
+          "avg_confidence",
+          0.0030048545449972153
+        ],
+        [
+          "footer_count",
+          0.002649579429998994
+        ],
+        [
+          "max_confidence",
+          0.00260759680531919
+        ],
+        [
+          "avg_sentence_length",
+          0.0021966889034956694
+        ],
+        [
+          "entity_density",
+          0.0016834854613989592
+        ],
+        [
+          "org_count",
+          0.0016148502472788095
+        ],
+        [
+          "driving_license_count",
+          0.0
+        ],
+        [
+          "credit_card_count",
+          0.0
+        ],
+        [
+          "upi_count",
+          0.0
+        ],
+        [
+          "language_encoded",
+          0.0
+        ],
+        [
+          "is_encrypted",
+          0.0
+        ],
+        [
+          "has_producer",
+          0.0
+        ],
+        [
+          "doc_length_category",
+          0.0
+        ],
+        [
+          "contains_personal_data",
+          0.0
+        ]
+      ]
+    }
+  },
+  "timestamp": "2026-07-11T12:24:04.810210"
+}

@@ -1,0 +1,95 @@
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.template
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+.next/
+out/
+dist/
+coverage/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Operating System
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# AI / ML / DL Model Weights & Cache Exclusions
+*.pt
+*.pth
+*.onnx
+*.onnx.data
+*.bin
+*.joblib
+*.ckpt
+*.safetensors
+dl_models/
+model_cache/
+.huggingface/
+.cache/
+
+# TensorBoard Logs
+runs/
+.tensorboard/
+
+# Reports & Document Outputs
+Performance_Report.*
+Security_Report.*
+Validation_Report.*
+Final_Validation_Report.*
+Final_Performance_Report.*
+Final_Security_Report.*
+Final_AI_Quality_Report.*
+System_Architecture.pdf
+Release_Checklist.pdf
+Migration_Report.pdf
+Logging_Report.json
+Secret_Audit_Report.json
+
+# Runtime storage & Preview Uploads
+uploads/
+temp/
+tmp/
+local_storage/
+cache/
+
+# MinIO / simulated storage exports
+minio_data/
+storage/
+backups/
+
+# Docker
+docker-data/
+docker-volumes/

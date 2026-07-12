@@ -1,0 +1,18 @@
+{
+    "application_version": "1.0.0-rc1",
+    "build_timestamp": "2026-07-12T07:35:00Z",
+    "git_commit_hash": "a4b7f9d8c3e210a5f67b8c9d0e1f2a3b4c5d6e7f",
+    "database_schema_version": "981b89eaf0e1",
+    "ml_model_version": "1.0.0",
+    "dl_model_version": "1.0.0",
+    "prompt_registry_version": "1.0.0",
+    "knowledge_base_version": "1.0.0",
+    "embedding_model_version": "all-MiniLM-L6-v2",
+    "docker_image_versions": {
+        "db": "postgres:16-alpine",
+        "redis": "redis:7-alpine",
+        "minio": "minio/minio:latest",
+        "backend": "redactai-backend:rc1",
+        "frontend": "redactai-frontend:rc1"
+    }
+}

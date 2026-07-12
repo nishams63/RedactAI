@@ -1,0 +1,15 @@
+{
+  "expected_sensitivity": "Internal",
+  "expected_risk_level": "MEDIUM",
+  "expected_entities": [
+    {
+      "entity_type": "ORGANIZATION",
+      "value": "CloudBuilders Inc"
+    },
+    {
+      "entity_type": "ORGANIZATION",
+      "value": "ClientCorp India"
+    }
+  ],
+  "ground_truth_text": "MASTER SERVICES AGREEMENT This Agreement is made between CloudBuilders Inc and ClientCorp India. Scope: Cloud migration services for global deployment. No sensitive personal information will be exchanged. The terms of services shall be governed by the laws of India."
+}

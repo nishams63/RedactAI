@@ -1,0 +1,23 @@
+{
+  "expected_sensitivity": "Confidential",
+  "expected_risk_level": "HIGH",
+  "expected_entities": [
+    {
+      "entity_type": "PAN",
+      "value": "FGHIJ5678K"
+    },
+    {
+      "entity_type": "PERSON",
+      "value": "Rajesh Kumar"
+    },
+    {
+      "entity_type": "AADHAAR",
+      "value": "9876-5432-1098"
+    },
+    {
+      "entity_type": "PIN_CODE",
+      "value": "110001"
+    }
+  ],
+  "ground_truth_text": "GOVERNMENT OF INDIA - FORM 16 / TAX RETRIEVAL Permanent Account Number (PAN): FGHIJ5678K. Name of Taxpayer: Rajesh Kumar. Aadhaar Card Number: 9876-5432-1098. Address: Flat 201, Shanti Apartments, New Delhi, 110001."
+}

@@ -1,0 +1,110 @@
+[
+  {
+    "title": "Obligation of Data Fiduciary to Process Personal Data",
+    "source": "DPDP Act",
+    "section_number": "Section 4",
+    "category": "Consent and Processing",
+    "keywords": ["personal data", "consent", "lawful purpose", "data fiduciary"],
+    "effective_date": "2023-08-11",
+    "content": "A person may process the personal data of a Data Principal only in accordance with the provisions of this Act, for a lawful purpose for which the Data Principal has given her consent, or for certain legitimate uses."
+  },
+  {
+    "title": "Notice Requirement for Personal Data Processing",
+    "source": "DPDP Act",
+    "section_number": "Section 5",
+    "category": "Notice and Information",
+    "keywords": ["notice", "personal data", "purpose", "rights", "grievance"],
+    "effective_date": "2023-08-11",
+    "content": "Every request for consent shall be accompanied or preceded by a notice given by the Data Fiduciary containing details of the personal data to be processed, the purpose of processing, and instructions on how the Data Principal can exercise her rights."
+  },
+  {
+    "title": "Processing of Personal Data of Children",
+    "source": "DPDP Act",
+    "section_number": "Section 9",
+    "category": "Children's Data",
+    "keywords": ["child", "consent", "parental consent", "harmful processing"],
+    "effective_date": "2023-08-11",
+    "content": "A Data Fiduciary shall, before processing any personal data of a child, obtain verifiable consent of the parent of such child or the lawful guardian. A Data Fiduciary shall not undertake processing that is likely to cause any detrimental effect on the well-being of a child."
+  },
+  {
+    "title": "Punishment for Disclosure of Information without Consent",
+    "source": "IT Act 2000",
+    "section_number": "Section 72A",
+    "category": "Disclosure Penalty",
+    "keywords": ["disclosure", "penalty", "consent", "intermediary", "personal information"],
+    "effective_date": "2009-10-27",
+    "content": "Any person, including an intermediary, who, while providing services under the terms of a contract, secures access to any material containing personal information and discloses it without the consent of the person concerned or in breach of contract, shall be punished with imprisonment up to three years or a fine up to five lakh rupees, or both."
+  },
+  {
+    "title": "Compensation for Failure to Protect Sensitive Personal Data",
+    "source": "IT Act 2000",
+    "section_number": "Section 43A",
+    "category": "Corporate Liability",
+    "keywords": ["compensation", "sensitive personal data", "reasonable security practices", "negligence"],
+    "effective_date": "2009-10-27",
+    "content": "Where a body corporate possessing, dealing or handling any sensitive personal data or information in a computer resource which it owns, controls or operates, is negligent in implementing and maintaining reasonable security practices and procedures and thereby causes wrongful loss or wrongful gain to any person, such body corporate shall be liable to pay damages by way of compensation to the person so affected."
+  },
+  {
+    "title": "Aadhaar Storage and Masking Mandate",
+    "source": "UIDAI Guidelines",
+    "section_number": "Section 3.2",
+    "category": "Aadhaar Security",
+    "keywords": ["aadhaar", "masking", "storage", "vault", "first 8 digits"],
+    "effective_date": "2021-05-15",
+    "content": "Any entity hosting Aadhaar data must mask the Aadhaar number. Specifically, the first 8 digits of the Aadhaar number must be replaced with asterisks, leaving only the last 4 digits visible in database logs, printed receipts, and UI displays, unless authorized under special legal frameworks."
+  },
+  {
+    "title": "Aadhaar Vaulting Requirements",
+    "source": "UIDAI Guidelines",
+    "section_number": "Section 4.1",
+    "category": "Storage Security",
+    "keywords": ["vault", "aadhaar reference key", "hsm", "encryption"],
+    "effective_date": "2021-05-15",
+    "content": "All Aadhaar numbers must be stored in a dedicated secure database known as the Aadhaar Data Vault. This database must be separated from transactional databases and reference numbers must be mapped utilizing secure reference keys."
+  },
+  {
+    "title": "RBI Mandatory Customer Due Diligence (KYC)",
+    "source": "RBI KYC Guidelines",
+    "section_number": "Section 10",
+    "category": "Customer Verification",
+    "keywords": ["kyc", "customer identification", "pan", "officially valid document", "ovd"],
+    "effective_date": "2016-02-25",
+    "content": "Regulated entities must obtain the customer's permanent account number (PAN) or Form 60 along with one officially valid document (OVD) like Passport, Driving License, Voter's Identity Card, or proof of possession of Aadhaar number during onboarding."
+  },
+  {
+    "title": "RBI Data Privacy and Confidentiality",
+    "source": "RBI KYC Guidelines",
+    "section_number": "Section 45",
+    "category": "Data Confidentiality",
+    "keywords": ["confidentiality", "third party share", "customer information", "consent exception"],
+    "effective_date": "2016-02-25",
+    "content": "Regulated entities shall keep customer information confidential and shall not disclose customer details or share transaction data with third parties without customer consent, except where required under governing statutes, court decrees, or official regulatory audits."
+  },
+  {
+    "title": "Validity of Non-Disclosure Agreements",
+    "source": "Indian Contract Act",
+    "section_number": "Section 27",
+    "category": "Restraints on Trade",
+    "keywords": ["restraint of trade", "nda", "confidentiality clause", "non-compete", "reasonable restraint"],
+    "effective_date": "1872-09-01",
+    "content": "Every agreement by which anyone is restrained from exercising a lawful profession, trade or business of any kind, is to that extent void. However, confidentiality and non-disclosure clauses protecting trade secrets and personal data are held valid to enforce corporate IP boundaries."
+  },
+  {
+    "title": "Company Non-Disclosure and IP Compliance",
+    "source": "Company Privacy Policy",
+    "section_number": "Rule 12",
+    "category": "Internal Compliance",
+    "keywords": ["internal policy", "employee contract", "ip protection", "disciplinary action"],
+    "effective_date": "2025-01-01",
+    "content": "All employee and contractor contracts must enforce a strict confidentiality obligation. Personal information of customers, partners, and employees must not be extracted or stored on personal computer drives or shared outside company-approved networks."
+  },
+  {
+    "title": "Company Customer PII Minimization Rule",
+    "source": "Company Privacy Policy",
+    "section_number": "Rule 15",
+    "category": "PII Minimization",
+    "keywords": ["minimization", "retention period", "deletion", "customer data"],
+    "effective_date": "2025-01-01",
+    "content": "No customer PII (including bank details, identity cards, phone numbers, and home addresses) may be retained for longer than 180 days post service contract termination, unless required under statutory compliance laws."
+  }
+]

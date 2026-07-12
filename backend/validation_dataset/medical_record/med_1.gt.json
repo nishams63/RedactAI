@@ -1,0 +1,19 @@
+{
+  "expected_sensitivity": "Highly Confidential",
+  "expected_risk_level": "HIGH",
+  "expected_entities": [
+    {
+      "entity_type": "PERSON",
+      "value": "Suresh Patel"
+    },
+    {
+      "entity_type": "PERSON",
+      "value": "Dr. Vikram Mehta"
+    },
+    {
+      "entity_type": "ORGANIZATION",
+      "value": "City Heart Care"
+    }
+  ],
+  "ground_truth_text": "HEALTHCARE CLINICAL REPORT Patient: Suresh Patel. Age: 45. Clinical Code: MED-9921. Diagnosis: Severe acute gastritis and hypertension. Patient is advised rest. Doctor: Dr. Vikram Mehta. Hospital: City Heart Care."
+}

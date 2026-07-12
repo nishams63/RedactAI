@@ -1,0 +1,19 @@
+{
+  "expected_sensitivity": "Internal",
+  "expected_risk_level": "MEDIUM",
+  "expected_entities": [
+    {
+      "entity_type": "EMAIL",
+      "value": "admin@redactai.in"
+    },
+    {
+      "entity_type": "BANK_ACCOUNT",
+      "value": "99912345678"
+    },
+    {
+      "entity_type": "IFSC",
+      "value": "HDFC0000999"
+    }
+  ],
+  "ground_truth_text": "TAX INVOICE Invoice No: INV-2026-0091. Date: 2026-07-01. Vendor: OfficeSupplies Ltd. Bill To: admin@redactai.in. Total Amount Due: INR 45,200.00. Transfer to account HDFC Bank A/c 99912345678, IFSC HDFC0000999."
+}

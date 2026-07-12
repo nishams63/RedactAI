@@ -1,0 +1,31 @@
+{
+  "expected_sensitivity": "Confidential",
+  "expected_risk_level": "HIGH",
+  "expected_entities": [
+    {
+      "entity_type": "ORGANIZATION",
+      "value": "Acme Corporation"
+    },
+    {
+      "entity_type": "PERSON",
+      "value": "John Doe"
+    },
+    {
+      "entity_type": "AADHAAR",
+      "value": "1234-5678-9012"
+    },
+    {
+      "entity_type": "PAN",
+      "value": "ABCDE1234F"
+    },
+    {
+      "entity_type": "EMAIL",
+      "value": "john.doe@example.com"
+    },
+    {
+      "entity_type": "PHONE",
+      "value": "+91 98765 43210"
+    }
+  ],
+  "ground_truth_text": "MUTUAL NON-DISCLOSURE AGREEMENT This Non-Disclosure Agreement ('Agreement') is entered into by and between Acme Corporation, located at Bangalore, Karnataka, and John Doe, residing in Mumbai, Maharashtra. Aadhaar Number of John Doe is 1234-5678-9012. PAN card is ABCDE1234F. Phone: +91 98765 43210. Email: john.doe@example.com. The parties agree to keep all proprietary business information confidential. Any leak of these private documents will lead to legal action."
+}

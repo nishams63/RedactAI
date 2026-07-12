@@ -1,0 +1,19 @@
+{
+  "expected_sensitivity": "Public",
+  "expected_risk_level": "LOW",
+  "expected_entities": [
+    {
+      "entity_type": "PERSON",
+      "value": "Devendra Yadav"
+    },
+    {
+      "entity_type": "PERSON",
+      "value": "Sanjay Kishan Kaul"
+    },
+    {
+      "entity_type": "ORGANIZATION",
+      "value": "Union of India"
+    }
+  ],
+  "ground_truth_text": "IN THE HIGH COURT OF DELHI AT NEW DELHI Case No: WP(C) 10234 of 2026. Order Date: 2026-07-09. Petitioner: Devendra Yadav. Respondent: Union of India & Others. Before Hon'ble Mr. Justice Sanjay Kishan Kaul. The writ petition is disposed of with directions."
+}

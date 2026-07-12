@@ -1,0 +1,23 @@
+{
+  "expected_sensitivity": "Confidential",
+  "expected_risk_level": "HIGH",
+  "expected_entities": [
+    {
+      "entity_type": "ORGANIZATION",
+      "value": "TechSolutions Pvt Ltd"
+    },
+    {
+      "entity_type": "PERSON",
+      "value": "Jane Smith"
+    },
+    {
+      "entity_type": "BANK_ACCOUNT",
+      "value": "501001234567"
+    },
+    {
+      "entity_type": "IFSC",
+      "value": "HDFC0000123"
+    }
+  ],
+  "ground_truth_text": "EMPLOYMENT CONTRACT AGREEMENT This contract is signed between TechSolutions Pvt Ltd, Bangalore, and Jane Smith, residing at Pune, Maharashtra. Salary packages: INR 15,00,000 per annum. Bank Account details: HDFC Bank A/c 501001234567, IFSC HDFC0000123. The employee shall start on 2026-07-15 as Senior Developer."
+}
