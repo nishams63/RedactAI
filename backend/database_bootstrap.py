@@ -4,42 +4,45 @@ import sys
 # Ensure backend directory is in python path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from sqlalchemy import inspect, text
 from database.session import engine, Base
 import models  # noqa: F401
 
-# Tables managed by Alembic migrations
-ALEMBIC_TABLES = {
-    "performance_benchmarks",
-    "performance_profiles",
-    "queue_metrics",
-    "audit_logs",
-    "login_attempts",
-    "security_alerts",
-    "password_histories",
-    "user_sessions",
-    "benchmark_questions",
-    "benchmark_runs",
-    "prompt_registry",
-}
-
 def bootstrap():
-    # If explicitly requested, drop all tables to start fresh (useful for resetting corrupted schemas)
-    if os.getenv("DROP_TABLES_ON_START", "false").lower() == "true":
-        print("DROP_TABLES_ON_START is enabled. Dropping all tables...")
+    """Drop any leftover tables from failed deploys, create all fresh, and stamp Alembic."""
+    inspector = inspect(engine)
+    existing_tables = inspector.get_table_names()
+    
+    if existing_tables:
+        print(f"Found {len(existing_tables)} existing tables: {existing_tables}")
+        # Check if alembic_version exists and is already at head
+        if "alembic_version" in existing_tables:
+            with engine.connect() as conn:
+                result = conn.execute(text("SELECT version_num FROM alembic_version"))
+                versions = [row[0] for row in result]
+                if versions:
+                    print(f"Alembic already stamped at: {versions}. Skipping bootstrap.")
+                    return
+        
+        # Tables exist but no alembic stamp — leftover from failed deploy
+        print("Dropping leftover tables from failed deploys...")
         Base.metadata.drop_all(bind=engine)
-        print("All tables dropped successfully.")
+        # Also drop alembic_version if it exists
+        with engine.connect() as conn:
+            conn.execute(text("DROP TABLE IF EXISTS alembic_version"))
+            conn.commit()
+        print("All leftover tables dropped.")
+    
+    print("Creating all database tables from SQLAlchemy models...")
+    Base.metadata.create_all(bind=engine)
+    print("All database tables created successfully!")
 
-    print("Bootstrapping database: identifying base tables to create...")
-    
-    # Filter Base.metadata to ONLY create base tables not managed by Alembic
-    tables_to_create = [
-        table for name, table in Base.metadata.tables.items()
-        if name not in ALEMBIC_TABLES
-    ]
-    
-    print(f"Creating {len(tables_to_create)} base tables...")
-    Base.metadata.create_all(bind=engine, tables=tables_to_create)
-    print("Database base tables bootstrapped successfully!")
+    # Stamp Alembic to head so it knows all migrations are "applied"
+    from alembic.config import Config
+    from alembic import command
+    alembic_cfg = Config("alembic.ini")
+    command.stamp(alembic_cfg, "head")
+    print("Alembic stamped to head revision. Bootstrap complete!")
 
 if __name__ == "__main__":
     bootstrap()
