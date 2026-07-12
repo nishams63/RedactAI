@@ -87,7 +87,7 @@ cache/
 
 # MinIO / simulated storage exports
 minio_data/
-storage/
+/storage/
 backups/
 
 # Docker
