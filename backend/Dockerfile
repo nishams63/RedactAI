@@ -18,5 +18,5 @@ COPY . .
 # Expose port
 EXPOSE 8000
 
-# Run migrations and start uvicorn dynamically binding to the cloud-assigned PORT env variable
-CMD ["sh", "-c", "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 2 --proxy-headers"]
+# Run schema bootstrap, migrations and start uvicorn dynamically binding to the cloud-assigned PORT env variable
+CMD ["sh", "-c", "python database_bootstrap.py && alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000} --workers 2 --proxy-headers"]
