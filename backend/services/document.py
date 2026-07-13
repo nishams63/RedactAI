@@ -241,32 +241,22 @@ class DocumentService:
             log_stage_exception("ProcessingJob database insert", e)
             raise
 
-        # Stage 12: Dispatch background task
+        # Stage 12: Trigger processing pipeline
         try:
             logger.info("BEFORE STAGE 12: Trigger async processing pipeline")
             from core.tasks import process_document_pipeline
-            if settings.DEPLOYMENT_MODE in ("single", "huggingface") or background_tasks:
-                def run_sync_wrapper(doc_id_str: str):
-                    try:
-                        logger.info(f"Background task execution started inside run_sync_wrapper for document {doc_id_str}")
-                        process_document_pipeline(doc_id_str)
-                        logger.info(f"Background task execution completed successfully for document {doc_id_str}")
-                    except Exception as e:
-                        logger.exception(f"CRITICAL: Exception inside the background task for document {doc_id_str}")
-                        raise e
-                    
-                if background_tasks:
-                    logger.info("Scheduling task with background_tasks.add_task()")
-                    background_tasks.add_task(run_sync_wrapper, str(doc_id))
-                    logger.info(f"AFTER STAGE 12: Dispatched task via background_tasks.add_task for doc {doc_id}")
-                else:
-                    logger.info("Running task synchronously")
-                    run_sync_wrapper(str(doc_id))
-                    logger.info(f"AFTER STAGE 12: Executed task synchronously for doc {doc_id}")
-            else:
+            if settings.DEPLOYMENT_MODE == "celery":
                 logger.info("Celery task dispatch triggered")
                 process_document_pipeline.delay(str(doc_id))
                 logger.info(f"AFTER STAGE 12: Celery task delay dispatched for doc {doc_id}")
+            else:
+                logger.info("Running task synchronously")
+                process_document_pipeline(str(doc_id))
+                logger.info(f"AFTER STAGE 12: Executed task synchronously for doc {doc_id}")
+                try:
+                    self.db.refresh(document)
+                except Exception:
+                    pass
         except Exception as e:
             log_stage_exception("Trigger async processing pipeline", e)
             logger.error(f"Failed to queue processing task for document {doc_id}: {e}")
@@ -275,6 +265,8 @@ class DocumentService:
             document.status = "Failed"
             self.db.commit()
             raise
+
+
 
         return document
 
