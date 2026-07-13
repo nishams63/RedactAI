@@ -120,29 +120,45 @@ class DocumentService:
         )
 
         # Create database record
-        document = self.doc_repo.create({
-            "id": doc_id,
-            "title": title,
-            "original_filename": sanitized_filename,
-            "storage_path": storage_path,
-            "file_size": file_size,
-            "mime_type": file.content_type,
-            "sha256": file_sha256,
-            "owner_id": user.id,
-            "organization_id": user.organization_id,
-            "status": "Pending",
-        })
+        try:
+            logger.info("BEFORE STEP 7: Database record creation started")
+            document_data = {
+                "id": doc_id,
+                "title": title,
+                "original_filename": sanitized_filename,
+                "storage_path": storage_path,
+                "file_size": file_size,
+                "mime_type": file.content_type,
+                "sha256": file_sha256,
+                "owner_id": user.id,
+                "organization_id": user.organization_id,
+                "status": "Pending",
+            }
+            logger.info("AFTER STEP 7: Database record creation started")
+
+            logger.info("BEFORE STEP 8: Database record creation completed")
+            document = self.doc_repo.create(document_data)
+            logger.info(f"AFTER STEP 8: Database record creation completed for document ID: {doc_id}")
+        except Exception as e:
+            logger.exception("Exception in Step 7 or 8: Database record creation")
+            raise e
+
 
         # Save audit log for document upload
-        audit = AuditLog(
-            user_id=user.id,
-            user_email=user.email,
-            action="UPLOAD",
-            resource=f"Document_{doc_id}",
-            result="SUCCESS"
-        )
-        self.db.add(audit)
-        self.db.commit()
+        try:
+            audit = AuditLog(
+                user_id=user.id,
+                user_email=user.email,
+                action="UPLOAD",
+                resource=f"Document_{doc_id}",
+                result="SUCCESS"
+            )
+            self.db.add(audit)
+            self.db.commit()
+        except Exception as e:
+            logger.error(f"Failed to save audit log: {e}\n{traceback.format_exc()}")
+            raise e
+
 
         # Create initial processing job
         from models.document_intelligence import ProcessingJob
@@ -162,7 +178,16 @@ class DocumentService:
             # If in single/huggingface mode or background_tasks is supplied, run synchronously/locally
             if settings.DEPLOYMENT_MODE in ("single", "huggingface") or background_tasks:
                 def run_sync_wrapper(doc_id_str: str):
-                    process_document_pipeline(doc_id_str)
+                    import traceback
+                    try:
+                        logger.info(f"Background task execution started for document {doc_id_str}")
+                        process_document_pipeline(doc_id_str)
+                        logger.info(f"Background task execution completed successfully for document {doc_id_str}")
+                    except Exception as e:
+                        logger.error(
+                            f"CRITICAL: Background task failed for document {doc_id_str}. "
+                            f"Preventing propagation to prevent ASGI crash. Error: {e}\n{traceback.format_exc()}"
+                        )
                     
                 if background_tasks:
                     background_tasks.add_task(run_sync_wrapper, str(doc_id))
@@ -171,6 +196,7 @@ class DocumentService:
                     run_sync_wrapper(str(doc_id))
                     logger.info(f"Processing pipeline executed synchronously for document {doc_id}")
             else:
+
                 process_document_pipeline.delay(str(doc_id))
                 logger.info(f"Processing pipeline triggered asynchronously via Celery for document {doc_id}")
         except Exception as e:

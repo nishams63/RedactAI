@@ -1,7 +1,7 @@
 """Document API endpoints — upload, list, detail, delete, and dashboard."""
 import uuid
 from typing import Optional
-from fastapi import APIRouter, Depends, UploadFile, File, Form, Query
+from fastapi import APIRouter, Depends, UploadFile, File, Form, Query, HTTPException
 from sqlalchemy.orm import Session
 from dependencies import get_db, get_current_user, check_permissions
 from schemas.document import (
@@ -16,6 +16,10 @@ router = APIRouter(prefix="/documents", tags=["Documents"])
 
 
 from fastapi import BackgroundTasks
+import traceback
+import logging
+
+logger = logging.getLogger("redactai.document")
 
 @router.post("/upload", response_model=DocumentUploadResponse, status_code=201)
 async def upload_document(
@@ -26,12 +30,37 @@ async def upload_document(
     db: Session = Depends(get_db),
 ):
     """Upload a new document (PDF, DOCX, or Image). Triggers async processing pipeline."""
-    service = DocumentService(db)
-    document = await service.upload_document(file=file, title=title, user=current_user, background_tasks=background_tasks)
-    return {
-        "document": document,
-        "message": "Document uploaded successfully. Processing pipeline started.",
-    }
+    try:
+        logger.info("UPLOAD HANDLER ENTERED")
+        logger.info("BEFORE STEP 1: Upload endpoint entered")
+        logger.info("AFTER STEP 1: Upload endpoint entered")
+
+
+        logger.info("BEFORE STEP 2: Authentication completed")
+        logger.info(f"AFTER STEP 2: Authentication completed — authorized user={current_user.email}")
+
+        service = DocumentService(db)
+        document = await service.upload_document(file=file, title=title, user=current_user, background_tasks=background_tasks)
+
+        logger.info("BEFORE STEP 9: Response returned")
+        res = {
+            "document": document,
+            "message": "Document uploaded successfully. Processing pipeline started.",
+        }
+        logger.info("AFTER STEP 9: Response returned")
+        return res
+    except HTTPException as he:
+        logger.exception("HTTPException in upload_document endpoint")
+        raise he
+    except Exception as e:
+        logger.exception("Unexpected exception in upload_document endpoint")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Document upload failed: {str(e)}"
+        )
+
+
+
 
 
 @router.get("", response_model=DocumentListResponse)

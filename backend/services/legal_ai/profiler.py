@@ -226,6 +226,9 @@ class PerformanceProfiler:
                 pass
 
         try:
+            from core.optional_dependencies import OptionalDependencyManager
+            if not OptionalDependencyManager.is_installed("reportlab"):
+                raise ImportError("Optional reportlab dependency is mocked or not installed.")
             from reportlab.lib.pagesizes import letter
             from reportlab.lib import colors
             from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle

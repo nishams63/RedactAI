@@ -26,11 +26,37 @@ async def lifespan(app: FastAPI):
     """Application startup and shutdown lifecycle."""
     # --- Startup ---
     import os
+    import uuid
     # Auto-create all required local storage directories
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    backend_dir = os.path.dirname(os.path.abspath(__file__))
+    base_dir = os.path.dirname(backend_dir)
+    
+    # Create in base_dir (project root)
     for folder in ["uploads", "reports", "cache", "models", "local_storage"]:
         os.makedirs(os.path.join(base_dir, folder), exist_ok=True)
     os.makedirs(os.path.join(base_dir, "local_storage", "reports"), exist_ok=True)
+    
+    # Create in backend_dir (backend root) to align with storage_client paths
+    for folder in ["uploads", "reports", "cache", "models", "local_storage"]:
+        os.makedirs(os.path.join(backend_dir, folder), exist_ok=True)
+    os.makedirs(os.path.join(backend_dir, "local_storage", "reports"), exist_ok=True)
+    os.makedirs(os.path.join(backend_dir, "local_storage", "uploads"), exist_ok=True)
+
+    # Proactively check write permissions on the local storage paths
+    for test_dir in [
+        os.path.join(backend_dir, "local_storage"),
+        os.path.join(backend_dir, "local_storage", "uploads"),
+        os.path.join(base_dir, "local_storage"),
+    ]:
+        try:
+            test_file = os.path.join(test_dir, f".write_test_{uuid.uuid4()}")
+            with open(test_file, "w") as f:
+                f.write("write test")
+            os.remove(test_file)
+            logger.info(f"Directory write check PASSED: {test_dir}")
+        except Exception as e:
+            logger.error(f"Directory write check FAILED: {test_dir}. Error: {e}")
+
 
     from core.secrets_validator import validate_startup_secrets
     validate_startup_secrets()

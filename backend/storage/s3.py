@@ -76,11 +76,22 @@ class StorageClient:
 
     def _save_local(self, key: str, content: bytes) -> str:
         path = self._local_path(key)
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "wb") as f:
-            f.write(content)
-        logger.info(f"Saved file to local storage: {path}")
-        return f"local://{key}"
+        try:
+            logger.info("BEFORE STEP 5: File save started")
+            logger.info(f"Local file write starting for path: {path}")
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "wb") as f:
+                f.write(content)
+            logger.info("AFTER STEP 5: File save started")
+
+            logger.info("BEFORE STEP 6: File save completed")
+            logger.info(f"Local file write completed for path: {path}")
+            logger.info("AFTER STEP 6: File save completed")
+            return f"local://{key}"
+        except Exception as e:
+            logger.exception("Exception in Step 5 or 6 (local write failure)")
+            raise OSError(f"Failed to write to local storage path: {e}")
+
 
     # ── public API ───────────────────────────────────────────────────
 
@@ -100,20 +111,46 @@ class StorageClient:
     def upload_file(self, file_content: bytes, document_id: str, filename: str,
                     content_type: str, prefix: str = UPLOAD_PREFIX) -> str:
         key = f"{prefix}/{document_id}/{filename}"
+        
+        # Step 3: Upload directory resolved
+        try:
+            logger.info("BEFORE STEP 3: Upload directory resolved")
+            dir_path = self._local_path(f"{prefix}/{document_id}")
+            logger.info(f"AFTER STEP 3: Upload directory resolved: {dir_path}")
+        except Exception as e:
+            logger.exception("Exception in Step 3: Upload directory resolved")
+            raise e
+
+        # Step 4: Storage provider selected
+        try:
+            logger.info("BEFORE STEP 4: Storage provider selected")
+            provider = "MinIO/S3" if self._minio_online else "Local Filesystem"
+            logger.info(f"AFTER STEP 4: Storage provider selected: {provider}")
+        except Exception as e:
+            logger.exception("Exception in Step 4: Storage provider selected")
+            raise e
 
         if not self._minio_online:
             return self._save_local(key, file_content)
 
         try:
+            logger.info("BEFORE STEP 5: File save started")
+            logger.info(f"S3 file write starting for key: {key}")
             self.client.put_object(
                 Bucket=self.bucket, Key=key,
                 Body=file_content, ContentType=content_type,
             )
-            logger.info(f"Uploaded {key} to bucket {self.bucket}")
+            logger.info("AFTER STEP 5: File save started")
+
+            logger.info("BEFORE STEP 6: File save completed")
+            logger.info(f"S3 file write completed for key: {key}")
+            logger.info("AFTER STEP 6: File save completed")
             return key
         except Exception as e:
-            logger.warning(f"MinIO upload failed, falling back to local storage: {e}")
+            logger.exception("Exception during S3 write (falling back to local filesystem)")
             return self._save_local(key, file_content)
+
+
 
     def download_file(self, storage_path: str) -> Optional[bytes]:
         if storage_path.startswith("local://"):

@@ -103,7 +103,9 @@ export default function DocumentsPage() {
       if (doc.status === "Processed") {
         cleanPath = cleanPath.replace("uploads/", "redacted/");
       }
-      window.open(`${API_URL}/documents/local-preview/${cleanPath}`, "_blank");
+      const token = localStorage.getItem("access_token");
+      const url = `${API_URL}/documents/local-preview/${cleanPath}${token ? `?token=${encodeURIComponent(token)}` : ""}`;
+      window.open(url, "_blank");
     } else {
       alert("Preview is only available for locally stored fallback files in Sprint 1.");
     }
