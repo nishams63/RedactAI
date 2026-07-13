@@ -12,32 +12,33 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          50: "#fff1f3",
-          100: "#ffe4e8",
-          200: "#fecdd6",
-          300: "#fda4b4",
-          400: "#fb7185",
-          500: "#B1234F", // Primary Accent
-          600: "#9d1c44",
-          700: "#831034",
-          800: "#640d28",
-          900: "#4d0a20",
-          950: "#310512",
+          50: "#eef2ff",
+          100: "#e0e7ff",
+          200: "#c7d2fe",
+          300: "#a5b4fc",
+          400: "#818cf8",
+          500: "#4F7BFF", // Primary Accent (Cinematic Blue)
+          600: "#3b5bdb",
+          700: "#2b44b0",
+          800: "#1f308a",
+          900: "#152066",
+          950: "#0b103a",
         },
         surface: {
-          50: "#fdfbfe",
-          100: "#f8f5fa",
-          200: "#f0ebf5",
-          300: "#e0d6eb",
-          400: "#c7b7d9",
-          500: "#8B8F99", // Muted
-          600: "#78B9A8", // Secondary Accent
-          700: "#331E3D", // Subtle border / dark accent
-          800: "#1A1020", // Surface
-          900: "#120913", // Primary Background
-          950: "#0b050c",
+          50: "#f8f9fb",
+          100: "#f1f3f5",
+          200: "#e9ecef",
+          300: "#dee2e6",
+          400: "#ced4da",
+          500: "#A3AEC2", // Muted
+          600: "#00D4B8", // Secondary Accent (Teal)
+          700: "#B7FF6A", // Highlight Accent (Lime)
+          800: "#151B26", // Surface
+          900: "#0A0E16", // Background
+          950: "#05070b",
         },
       },
+
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],
       },
