@@ -108,8 +108,39 @@ class AIOrchestrator:
             file_bytes = storage_client.download_file(doc.storage_path)
             if not file_bytes:
                 raise ValueError("Failed to retrieve document binary from storage client.")
-            
+
+            # Diagnostic Log requested by User
+            try:
+                import os
+                file_len = len(file_bytes)
+                first_32_hex = file_bytes[:32].hex()
+
+                # Check local file stats if local path
+                local_path_str = "N/A (S3/MinIO)"
+                local_exists = False
+                local_size = -1
+                if doc.storage_path.startswith("local://"):
+                    key = doc.storage_path.replace("local://", "")
+                    local_path_str = storage_client._local_path(key)
+                    local_exists = os.path.exists(local_path_str)
+                    if local_exists:
+                        local_size = os.path.getsize(local_path_str)
+
+                logger.info(
+                    f"DIAGNOSTIC STATS:\n"
+                    f"- Length of downloaded bytes: {file_len}\n"
+                    f"- First 32 bytes in hex: {first_32_hex}\n"
+                    f"- Storage Path reference: {doc.storage_path}\n"
+                    f"- Resolved Local File Path: {local_path_str}\n"
+                    f"- Local file exists: {local_exists}\n"
+                    f"- Local file size on disk: {local_size}\n"
+                    f"- Document MIME type: {doc.mime_type}"
+                )
+            except Exception as diag_err:
+                logger.error(f"Error during diagnostic logging: {diag_err}")
+
             allowed_exts = [".pdf", ".docx", ".png", ".jpg", ".jpeg"]
+
             ext = os.path.splitext(doc.original_filename)[1].lower()
             if ext not in allowed_exts:
                 raise ValueError(f"Unsupported file extension {ext}")
