@@ -33,95 +33,161 @@ class DocumentService:
     async def upload_document(self, file: UploadFile, title: str, user: User, background_tasks = None) -> dict:
         import hashlib
         import os
+        import sys
+        import traceback
         from models.document import Document
         from models.ai_models import AuditLog, SecurityAlert
 
-        # 1. Validate mime type
-        if file.content_type not in ALLOWED_MIME_TYPES:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"File type '{file.content_type}' not supported. Allowed: PDF, DOCX, PNG, JPEG, TIFF",
+        def log_stage_exception(stage_name: str, e: Exception):
+            exc_type, exc_value, exc_tb = sys.exc_info()
+            tb_list = traceback.extract_tb(exc_tb)
+            line_num = "unknown"
+            filename = "unknown"
+            func_name = "unknown"
+            if tb_list:
+                last_tb = tb_list[-1]
+                line_num = last_tb.lineno
+                filename = last_tb.filename
+                func_name = last_tb.name
+            logger.exception(
+                f"[STAGE ERROR] Failed at stage: {stage_name}. "
+                f"Exception: {type(e).__name__}: {e}. "
+                f"Line number: {line_num} in {filename} ({func_name})"
             )
 
-        # Read and validate file size
-        content = await file.read()
-        file_size = len(content)
-        if file_size > MAX_FILE_SIZE:
-            raise HTTPException(
-                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                detail=f"File exceeds maximum size of {MAX_FILE_SIZE // (1024*1024)} MB",
-            )
+        # Stage 1: Validate MIME type
+        try:
+            logger.info("BEFORE STAGE 1: Mime type validation")
+            if file.content_type not in ALLOWED_MIME_TYPES:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"File type '{file.content_type}' not supported. Allowed: PDF, DOCX, PNG, JPEG, TIFF",
+                )
+            logger.info("AFTER STAGE 1: Mime type validation succeeded")
+        except Exception as e:
+            log_stage_exception("Mime type validation", e)
+            raise
 
-        # 2. Filename sanitization
-        original_name = file.filename or "unnamed"
-        sanitized_filename = os.path.basename(original_name).replace("..", "").strip()
+        # Stage 2: Read file & validate size
+        try:
+            logger.info("BEFORE STAGE 2: Read file & size check")
+            content = await file.read()
+            file_size = len(content)
+            if file_size > MAX_FILE_SIZE:
+                raise HTTPException(
+                    status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                    detail=f"File exceeds maximum size of {MAX_FILE_SIZE // (1024*1024)} MB",
+                )
+            logger.info(f"AFTER STAGE 2: Read file & size check. Size: {file_size} bytes")
+        except Exception as e:
+            log_stage_exception("Read file & size check", e)
+            raise
 
-        # 3. Validate magic bytes / file signature
-        signature_map = {
-            "application/pdf": b"%PDF",
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document": b"PK\x03\x04",
-            "image/png": b"\x89PNG\r\n\x1a\n",
-            "image/jpeg": b"\xff\xd8\xff",
-            "image/jpg": b"\xff\xd8\xff",
-            "image/tiff": (b"II*\x00", b"MM\x00*")
-        }
-        
-        sig = signature_map.get(file.content_type)
-        if sig:
-            matched = False
-            if isinstance(sig, tuple):
-                matched = any(content.startswith(s) for s in sig)
-            else:
-                matched = content.startswith(sig)
-            if not matched:
+        # Stage 3: Filename sanitization
+        try:
+            logger.info("BEFORE STAGE 3: Filename sanitization")
+            original_name = file.filename or "unnamed"
+            sanitized_filename = os.path.basename(original_name).replace("..", "").strip()
+            logger.info(f"AFTER STAGE 3: Filename sanitized: {sanitized_filename}")
+        except Exception as e:
+            log_stage_exception("Filename sanitization", e)
+            raise
+
+        # Stage 4: Validate magic bytes / file signature
+        try:
+            logger.info("BEFORE STAGE 4: Magic bytes validation")
+            signature_map = {
+                "application/pdf": b"%PDF",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document": b"PK\x03\x04",
+                "image/png": b"\x89PNG\r\n\x1a\n",
+                "image/jpeg": b"\xff\xd8\xff",
+                "image/jpg": b"\xff\xd8\xff",
+                "image/tiff": (b"II*\x00", b"MM\x00*")
+            }
+            sig = signature_map.get(file.content_type)
+            if sig:
+                matched = False
+                if isinstance(sig, tuple):
+                    matched = any(content.startswith(s) for s in sig)
+                else:
+                    matched = content.startswith(sig)
+                if not matched:
+                    alert = SecurityAlert(
+                        event_type="SUSPICIOUS_UPLOAD_SIGNATURE_MISMATCH",
+                        severity="CRITICAL",
+                        description=f"File upload blocked: content-type {file.content_type} signature mismatch.",
+                        details={"filename": sanitized_filename}
+                    )
+                    self.db.add(alert)
+                    self.db.commit()
+                    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File contents do not match specified MIME type signature.")
+            logger.info("AFTER STAGE 4: Magic bytes validation passed")
+        except Exception as e:
+            log_stage_exception("Magic bytes validation", e)
+            raise
+
+        # Stage 5: Integrity duplicate check
+        try:
+            logger.info("BEFORE STAGE 5: Duplicate checksum check")
+            file_sha256 = hashlib.sha256(content).hexdigest()
+            duplicate = self.db.query(Document).filter(Document.sha256 == file_sha256).first()
+            if duplicate:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Duplicate file upload detected. File has already been uploaded.")
+            logger.info("AFTER STAGE 5: Duplicate checksum check passed")
+        except Exception as e:
+            log_stage_exception("Duplicate checksum check", e)
+            raise
+
+        # Stage 6: Malware scanning
+        try:
+            logger.info("BEFORE STAGE 6: Malware scanner check")
+            if b"EICAR-STANDARD" in content or b"malware-trigger" in content:
                 alert = SecurityAlert(
-                    event_type="SUSPICIOUS_UPLOAD_SIGNATURE_MISMATCH",
+                    event_type="MALICIOUS_UPLOAD_BLOCKED",
                     severity="CRITICAL",
-                    description=f"File upload blocked: content-type {file.content_type} signature mismatch.",
-                    details={"filename": sanitized_filename}
+                    description=f"Malware scanning blocked malicious upload: {sanitized_filename}",
+                    details={"sha256": file_sha256}
                 )
                 self.db.add(alert)
                 self.db.commit()
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File contents do not match specified MIME type signature.")
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File rejected: potential malware detected during safety scan.")
+            logger.info("AFTER STAGE 6: Malware scanner check passed")
+        except Exception as e:
+            log_stage_exception("Malware scanner check", e)
+            raise
 
-        # 4. SHA-256 integrity hash duplicate checks
-        file_sha256 = hashlib.sha256(content).hexdigest()
-        duplicate = self.db.query(Document).filter(Document.sha256 == file_sha256).first()
-        if duplicate:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Duplicate file upload detected. File has already been uploaded.")
-
-        # 5. Mock virus / malware scanning
-        if b"EICAR-STANDARD" in content or b"malware-trigger" in content:
-            alert = SecurityAlert(
-                event_type="MALICIOUS_UPLOAD_BLOCKED",
-                severity="CRITICAL",
-                description=f"Malware scanning blocked malicious upload: {sanitized_filename}",
-                details={"sha256": file_sha256}
-            )
-            self.db.add(alert)
-            self.db.commit()
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File rejected: potential malware detected during safety scan.")
-
-        if not user.organization_id:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="User must belong to an organization to upload documents",
-            )
-
-        doc_id = uuid.uuid4()
-
-        # Upload to MinIO
-        storage_path = storage_client.upload_file(
-            file_content=content,
-            document_id=str(doc_id),
-            filename=sanitized_filename,
-            content_type=file.content_type,
-            prefix=UPLOAD_PREFIX,
-        )
-
-        # Create database record
+        # Stage 7: Org check
         try:
-            logger.info("BEFORE STEP 7: Database record creation started")
+            logger.info("BEFORE STAGE 7: Organization verification")
+            if not user.organization_id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="User must belong to an organization to upload documents",
+                )
+            logger.info(f"AFTER STAGE 7: Organization verification: {user.organization_id}")
+        except Exception as e:
+            log_stage_exception("Organization verification", e)
+            raise
+
+        # Stage 8: Storage upload
+        try:
+            logger.info("BEFORE STAGE 8: Uploading file to storage provider")
+            doc_id = uuid.uuid4()
+            storage_path = storage_client.upload_file(
+                file_content=content,
+                document_id=str(doc_id),
+                filename=sanitized_filename,
+                content_type=file.content_type,
+                prefix=UPLOAD_PREFIX,
+            )
+            logger.info(f"AFTER STAGE 8: Uploaded to storage. Path: {storage_path}")
+        except Exception as e:
+            log_stage_exception("Storage upload", e)
+            raise
+
+        # Stage 9: Database record insert
+        try:
+            logger.info("BEFORE STAGE 9: Database record insert started")
             document_data = {
                 "id": doc_id,
                 "title": title,
@@ -134,18 +200,15 @@ class DocumentService:
                 "organization_id": user.organization_id,
                 "status": "Pending",
             }
-            logger.info("AFTER STEP 7: Database record creation started")
-
-            logger.info("BEFORE STEP 8: Database record creation completed")
             document = self.doc_repo.create(document_data)
-            logger.info(f"AFTER STEP 8: Database record creation completed for document ID: {doc_id}")
+            logger.info(f"AFTER STAGE 9: Database record insert completed. Doc ID: {doc_id}")
         except Exception as e:
-            logger.exception("Exception in Step 7 or 8: Database record creation")
-            raise e
+            log_stage_exception("Database record insert", e)
+            raise
 
-
-        # Save audit log for document upload
+        # Stage 10: Audit logging
         try:
+            logger.info("BEFORE STAGE 10: Audit logging insert")
             audit = AuditLog(
                 user_id=user.id,
                 user_email=user.email,
@@ -155,56 +218,63 @@ class DocumentService:
             )
             self.db.add(audit)
             self.db.commit()
+            logger.info("AFTER STAGE 10: Audit logging insert succeeded")
         except Exception as e:
-            logger.error(f"Failed to save audit log: {e}\n{traceback.format_exc()}")
-            raise e
+            log_stage_exception("Audit logging insert", e)
+            raise
 
-
-        # Create initial processing job
-        from models.document_intelligence import ProcessingJob
-        job = ProcessingJob(
-            id=uuid.uuid4(),
-            document_id=doc_id,
-            job_type="FULL_PIPELINE",
-            status="PENDING",
-            progress=0
-        )
-        self.db.add(job)
-        self.db.commit()
-
-        # Trigger async processing pipeline (CTO requirement: always Celery)
+        # Stage 11: Processing job model insert
         try:
+            logger.info("BEFORE STAGE 11: ProcessingJob database insert")
+            from models.document_intelligence import ProcessingJob
+            job = ProcessingJob(
+                id=uuid.uuid4(),
+                document_id=doc_id,
+                job_type="FULL_PIPELINE",
+                status="PENDING",
+                progress=0
+            )
+            self.db.add(job)
+            self.db.commit()
+            logger.info(f"AFTER STAGE 11: ProcessingJob database insert succeeded. Job ID: {job.id}")
+        except Exception as e:
+            log_stage_exception("ProcessingJob database insert", e)
+            raise
+
+        # Stage 12: Dispatch background task
+        try:
+            logger.info("BEFORE STAGE 12: Trigger async processing pipeline")
             from core.tasks import process_document_pipeline
-            # If in single/huggingface mode or background_tasks is supplied, run synchronously/locally
             if settings.DEPLOYMENT_MODE in ("single", "huggingface") or background_tasks:
                 def run_sync_wrapper(doc_id_str: str):
-                    import traceback
                     try:
-                        logger.info(f"Background task execution started for document {doc_id_str}")
+                        logger.info(f"Background task execution started inside run_sync_wrapper for document {doc_id_str}")
                         process_document_pipeline(doc_id_str)
                         logger.info(f"Background task execution completed successfully for document {doc_id_str}")
                     except Exception as e:
-                        logger.error(
-                            f"CRITICAL: Background task failed for document {doc_id_str}. "
-                            f"Preventing propagation to prevent ASGI crash. Error: {e}\n{traceback.format_exc()}"
-                        )
+                        logger.exception(f"CRITICAL: Exception inside the background task for document {doc_id_str}")
+                        raise e
                     
                 if background_tasks:
+                    logger.info("Scheduling task with background_tasks.add_task()")
                     background_tasks.add_task(run_sync_wrapper, str(doc_id))
-                    logger.info(f"Processing pipeline dispatched via BackgroundTasks for document {doc_id}")
+                    logger.info(f"AFTER STAGE 12: Dispatched task via background_tasks.add_task for doc {doc_id}")
                 else:
+                    logger.info("Running task synchronously")
                     run_sync_wrapper(str(doc_id))
-                    logger.info(f"Processing pipeline executed synchronously for document {doc_id}")
+                    logger.info(f"AFTER STAGE 12: Executed task synchronously for doc {doc_id}")
             else:
-
+                logger.info("Celery task dispatch triggered")
                 process_document_pipeline.delay(str(doc_id))
-                logger.info(f"Processing pipeline triggered asynchronously via Celery for document {doc_id}")
+                logger.info(f"AFTER STAGE 12: Celery task delay dispatched for doc {doc_id}")
         except Exception as e:
+            log_stage_exception("Trigger async processing pipeline", e)
             logger.error(f"Failed to queue processing task for document {doc_id}: {e}")
             job.status = "FAILED"
             job.error_message = f"Task dispatch failed: {str(e)}"
             document.status = "Failed"
             self.db.commit()
+            raise
 
         return document
 
