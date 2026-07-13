@@ -28,8 +28,8 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
 
 # Copy backend dependencies and install
 COPY backend/requirements.txt ./backend/
-RUN pip install --no-cache-dir -r backend/requirements.txt \
-    && python -m spacy download en_core_web_sm
+RUN pip install --no-cache-dir -r backend/requirements.txt
+
 
 
 # Copy backend source
