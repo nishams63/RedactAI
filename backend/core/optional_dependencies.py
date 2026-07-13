@@ -18,9 +18,13 @@ class DependencyStatus:
             return _MOCK_OVERRIDES[self.name]
         try:
             importlib.import_module(self.name)
+            if self.name == "spacy":
+                import spacy
+                spacy.load("en_core_web_sm")
             return True
         except (ImportError, ModuleNotFoundError, Exception):
             return False
+
 
     @property
     def version(self) -> Optional[str]:

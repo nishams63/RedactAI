@@ -260,8 +260,18 @@ class PresidioPIIProvider(PIIProvider):
     def __init__(self):
         self.analyzer = None
         try:
+            import spacy
+            if not spacy.util.is_package("en_core_web_sm"):
+                logger.warning(
+                    "spaCy model 'en_core_web_sm' is not installed. "
+                    "Disabling Presidio AnalyzerEngine to prevent runtime model download, using rule-based fallback."
+                )
+                self.regex_patterns = INDIAN_PII_PATTERNS
+                return
+
             from presidio_analyzer import AnalyzerEngine, PatternRecognizer, Pattern
             from presidio_analyzer.nlp_engine import NlpEngineProvider
+
             
             # Configure NLP engine to use en_core_web_sm to avoid downloading en_core_web_lg
             nlp_config = {
