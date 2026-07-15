@@ -13,6 +13,7 @@ from api.v1.legal import router as legal_router
 from api.v1.security import router as security_router
 from api.v1.release import router as release_router
 from api.v1.system import router as system_router
+from api.v1.nlp import router as nlp_router
 
 api_v1_router = APIRouter(prefix="/api/v1")
 
@@ -27,3 +28,4 @@ api_v1_router.include_router(legal_router)
 api_v1_router.include_router(security_router)
 api_v1_router.include_router(release_router)
 api_v1_router.include_router(system_router)
+api_v1_router.include_router(nlp_router)

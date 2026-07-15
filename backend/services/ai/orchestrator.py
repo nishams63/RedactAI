@@ -227,7 +227,13 @@ class AIOrchestrator:
             layout_blocks = []
             if ENABLE_LAYOUT_ANALYSIS:
                 layout_prov = ai_registry.get_layout_provider()
-                layout_blocks = layout_prov.analyze_layout(file_bytes, doc.mime_type)
+                raw_layout_blocks = layout_prov.analyze_layout(file_bytes, doc.mime_type)
+                try:
+                    from services.ai.structure_analyzer import structure_analyzer
+                    layout_blocks = structure_analyzer.analyze_structure(raw_layout_blocks)
+                except Exception as struct_err:
+                    logger.error(f"Structure classification failed: {struct_err}")
+                    layout_blocks = raw_layout_blocks
                 
             self._log_stage(doc.id, "ANALYZING", f"Layout analysis complete. Extracted {len(layout_blocks)} structural blocks.")
 
@@ -302,6 +308,20 @@ class AIOrchestrator:
             )
             self.db.add(db_metadata)
             self.db.commit()
+
+            # Index document blocks for semantic search indexing
+            try:
+                from services.ai.semantic_search import semantic_search_engine
+                blocks_for_indexing = [{
+                    "page_number": b["page_number"],
+                    "block_type": b["block_type"],
+                    "text": b["text"],
+                    "coordinates": b["coordinates"],
+                    "reading_order": b["reading_order"]
+                } for b in layout_blocks]
+                semantic_search_engine.index_document(doc.id, doc.organization_id, blocks_for_indexing)
+            except Exception as index_err:
+                logger.error(f"Semantic search indexing failed: {index_err}")
 
             self._log_stage(doc.id, "EXTRACTING", f"Text extraction complete. Total pages saved: {page_count}.")
 
