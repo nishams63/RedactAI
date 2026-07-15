@@ -381,18 +381,84 @@ class DocumentService:
         }
 
     def delete_document(self, document_id: uuid.UUID, user: User) -> None:
+        import os
+        import shutil
+        from storage.s3 import _LOCAL_STORAGE_DIR
+        from models.document import Document, DocumentVersion
+        from models.document_intelligence import DocumentMetadata, DocumentPage, DocumentBlock, DocumentEntity, ProcessingJob
+        from models.ai_models import DetectedEntity, Redaction, ComplianceResult, ProcessingLog, HumanReview
+        from models.ml_models import MLPrediction
+
         doc = self.doc_repo.get_by_id(document_id)
         if not doc:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
         if doc.organization_id != user.organization_id:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
 
-        # Delete from MinIO
-        storage_client.delete_file(doc.storage_path)
+        # 1. Clean up file resources (original, redacted, and OCR files)
+        storage_path_str = doc.storage_path or ""
+        try:
+            storage_client.delete_file(storage_path_str)
+        except Exception as e:
+            logger.warning(f"Failed to delete original file {storage_path_str}: {e}")
 
-        # Delete from database
-        self.doc_repo.delete(document_id)
-        logger.info(f"Document {document_id} deleted by user {user.id}")
+        # Delete redacted and ocr files if they exist
+        try:
+            if storage_path_str.startswith("local://"):
+                storage_client.delete_file(storage_path_str.replace("uploads/", "redacted/"))
+                storage_client.delete_file(f"local://ocr/{doc.id}/{doc.id}_ocr.json")
+
+                # Clean up document folders on the filesystem
+                for prefix in ["uploads", "redacted", "ocr"]:
+                    dir_to_remove = os.path.join(_LOCAL_STORAGE_DIR, prefix, str(doc.id))
+                    if os.path.exists(dir_to_remove):
+                        try:
+                            shutil.rmtree(dir_to_remove)
+                            logger.info(f"Deleted local directory: {dir_to_remove}")
+                        except Exception as e:
+                            logger.error(f"Failed to remove directory {dir_to_remove}: {e}")
+            else:
+                storage_client.delete_file(storage_path_str.replace("uploads/", "redacted/"))
+                storage_client.delete_file(f"ocr/{doc.id}/{doc.id}_ocr.json")
+        except Exception as e:
+            logger.warning(f"Non-fatal error cleaning up storage files for doc {document_id}: {e}")
+
+        # 2. Delete related child records — order matters for FK constraints
+        #    Redaction → DetectedEntity (Redaction.detected_entity_id FK)
+        try:
+            self.db.query(Redaction).filter(Redaction.document_id == document_id).delete(synchronize_session=False)
+            self.db.query(DetectedEntity).filter(DetectedEntity.document_id == document_id).delete(synchronize_session=False)
+            self.db.query(ComplianceResult).filter(ComplianceResult.document_id == document_id).delete(synchronize_session=False)
+            self.db.query(ProcessingLog).filter(ProcessingLog.document_id == document_id).delete(synchronize_session=False)
+            self.db.query(HumanReview).filter(HumanReview.document_id == document_id).delete(synchronize_session=False)
+            self.db.query(MLPrediction).filter(MLPrediction.document_id == document_id).delete(synchronize_session=False)
+            self.db.query(DocumentMetadata).filter(DocumentMetadata.document_id == document_id).delete(synchronize_session=False)
+            self.db.query(DocumentPage).filter(DocumentPage.document_id == document_id).delete(synchronize_session=False)
+            self.db.query(DocumentBlock).filter(DocumentBlock.document_id == document_id).delete(synchronize_session=False)
+            self.db.query(DocumentEntity).filter(DocumentEntity.document_id == document_id).delete(synchronize_session=False)
+            self.db.query(ProcessingJob).filter(ProcessingJob.document_id == document_id).delete(synchronize_session=False)
+            self.db.query(DocumentVersion).filter(DocumentVersion.document_id == document_id).delete(synchronize_session=False)
+            self.db.flush()
+        except Exception as e:
+            logger.error(f"Error deleting child records for document {document_id}: {e}")
+            self.db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to delete document related records: {str(e)}",
+            )
+
+        # 3. Delete the parent Document record
+        try:
+            self.db.query(Document).filter(Document.id == document_id).delete(synchronize_session=False)
+            self.db.commit()
+        except Exception as e:
+            logger.error(f"Error deleting parent Document {document_id}: {e}")
+            self.db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to delete document: {str(e)}",
+            )
+        logger.info(f"Document {document_id} and all associated files/records deleted by user {user.id}")
 
     def get_dashboard_stats(self, user: User) -> dict:
         doc_counts = self.doc_repo.count_by_status(organization_id=user.organization_id)

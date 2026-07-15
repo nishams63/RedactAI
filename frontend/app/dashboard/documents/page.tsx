@@ -68,6 +68,9 @@ export default function DocumentsPage() {
       queryClient.invalidateQueries({ queryKey: ["documents"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
+    onError: (error: any) => {
+      alert(`Failed to delete document: ${error.message || "Unknown error"}`);
+    },
   });
 
   const handleDrop = useCallback((e: React.DragEvent) => {
