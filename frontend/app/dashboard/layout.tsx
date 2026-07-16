@@ -7,7 +7,7 @@ import { useTheme } from "next-themes";
 import {
   Shield, LayoutDashboard, FileText, Building2, User, LogOut,
   Menu, X, Sun, Moon, ChevronDown, Bell, Brain, CheckSquare, Cpu, ShieldCheck,
-  MessageSquare, Bookmark
+  MessageSquare, Bookmark, Network, Activity
 } from "lucide-react";
 
 const navItems = [
@@ -18,6 +18,8 @@ const navItems = [
   { label: "Legal AI", href: "/dashboard/legal-ai", icon: Shield },
   { label: "AI Copilot", href: "/dashboard/copilot", icon: MessageSquare },
   { label: "AI Workspace", href: "/dashboard/workspace", icon: Bookmark },
+  { label: "Knowledge Graph", href: "/dashboard/graph", icon: Network },
+  { label: "Agent Monitor", href: "/dashboard/agents", icon: Activity },
   { label: "Security", href: "/dashboard/security", icon: Shield },
   { label: "AI Quality", href: "/dashboard/ai-quality", icon: CheckSquare },
   { label: "Validation", href: "/dashboard/validation", icon: CheckSquare },
