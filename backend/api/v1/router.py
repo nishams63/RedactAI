@@ -14,6 +14,10 @@ from api.v1.security import router as security_router
 from api.v1.release import router as release_router
 from api.v1.system import router as system_router
 from api.v1.nlp import router as nlp_router
+from api.v1.rag import router as rag_router
+from api.v1.copilot import router as copilot_router
+from api.v1.graph import router as graph_router
+from api.v1.agents import router as agents_router
 
 api_v1_router = APIRouter(prefix="/api/v1")
 
@@ -29,3 +33,7 @@ api_v1_router.include_router(security_router)
 api_v1_router.include_router(release_router)
 api_v1_router.include_router(system_router)
 api_v1_router.include_router(nlp_router)
+api_v1_router.include_router(rag_router)
+api_v1_router.include_router(copilot_router)
+api_v1_router.include_router(graph_router)
+api_v1_router.include_router(agents_router)

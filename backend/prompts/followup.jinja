@@ -1,0 +1,9 @@
+Based on the conversation history below, suggest exactly three relevant, high-value follow-up questions the user might want to ask next to deepen their understanding of the contract, obligation, or risk analyzed.
+
+Conversation History:
+{% for msg in history %}
+{{ msg.role }}: {{ msg.content }}
+{% endfor %}
+
+Provide output as a JSON list of three strings. E.g.:
+["What is the penalty for breaching this confidentiality clause?", "Is there a grace period for notice obligations?", "Are there any exemptions under this clause?"]

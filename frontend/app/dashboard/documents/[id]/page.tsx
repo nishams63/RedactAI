@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/services/api";
 import { formatDate } from "@/lib/utils";
@@ -41,7 +41,10 @@ const RISK_BADGES: Record<string, string> = {
 export default function DocumentViewerPage() {
   const { id } = useParams() as { id: string };
   const router = useRouter();
-  const [currentPage, setCurrentPage] = useState(1);
+  const searchParams = useSearchParams();
+  const pageParam = searchParams ? searchParams.get("page") : null;
+  const initialPage = pageParam ? parseInt(pageParam, 10) : 1;
+  const [currentPage, setCurrentPage] = useState(initialPage);
   const [activeTab, setActiveTab] = useState<"entities" | "logs">("entities");
 
   const { data: doc, isLoading, error } = useQuery({

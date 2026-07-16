@@ -1,8 +1,3 @@
-"""
-Evaluator — Level 2 Deep Learning Enhancement
-Generates performance audit comparisons (Accuracy, Latency, Memory, Throughput)
-between traditional ML baseline models and Deep Learning models.
-"""
 import os
 import json
 import logging
@@ -10,6 +5,8 @@ from typing import Dict, Any
 
 from services.deep_learning.utils import DL_MODELS_DIR
 from services.ml.dataset_generator import ML_MODELS_DIR as ML_DIR
+from database.session import SessionLocal
+from models.ai_models import AIModel
 
 logger = logging.getLogger("redactai.dl.evaluator")
 
@@ -64,22 +61,72 @@ class DLEvaluator:
                 # Traditional models have very high throughput
                 "throughput": 1000.0 / max(perf.get("inference_time_ms_per_sample", 0.1), 0.001),
                 "memory_mb": 15.0,  # Approximate size of scikit-learn models in RAM
-                "training_time_seconds": perf.get("training_time_seconds", 0.0)
+                "training_time_seconds": perf.get("training_time_seconds", 0.0),
+                "model_size_mb": 5.0,
+                "inference_time_ms": perf.get("inference_time_ms_per_sample", 0.0)
             }
 
         # 2. Add DL Model (LegalBERT)
         if dl_data:
             dl_metrics = dl_data.get("metrics", {})
+            
+            # Dynamically compute size
+            artifacts_dir = os.path.dirname(DL_MODELS_DIR)
+            transformer_path = os.path.join(artifacts_dir, "artifacts", "models", "transformer.pt")
+            if os.path.exists(transformer_path):
+                model_size = os.path.getsize(transformer_path) / (1024 * 1024)
+            else:
+                model_size = 418.0
+
             comparison["models"]["LegalBERT"] = {
                 "type": "DL (Transformer)",
                 "accuracy": dl_metrics.get("accuracy", 0.0),
-                "precision": dl_metrics.get("precision_macro", 0.0),
-                "recall": dl_metrics.get("recall_macro", 0.0),
+                "precision": dl_metrics.get("precision_macro", 0.0) or dl_metrics.get("precision", 0.0),
+                "recall": dl_metrics.get("recall_macro", 0.0) or dl_metrics.get("recall", 0.0),
                 "f1": dl_metrics.get("f1_macro", 0.0),
                 "latency_ms": dl_metrics.get("latency_ms", 0.0),
                 "throughput": dl_metrics.get("throughput", 0.0),
                 "memory_mb": dl_metrics.get("memory_mb", 0.0),
-                "training_time_seconds": dl_data.get("training_time_seconds", 0.0)
+                "training_time_seconds": dl_data.get("training_time_seconds", 0.0),
+                "model_size_mb": model_size,
+                "inference_time_ms": dl_metrics.get("latency_ms", 0.0)
             }
+
+        # 3. Add sequence models from DB registry
+        db = SessionLocal()
+        try:
+            registered_models = db.query(AIModel).all()
+            for model in registered_models:
+                # Add DL models (e.g. LSTM, GRU, RNN, BiLSTM)
+                model_name_lower = model.name.lower()
+                if "classifier" in model_name_lower and "legalbert" not in model_name_lower:
+                    params = model.parameters or {}
+                    
+                    # Compute file size dynamically
+                    model_type_code = model_name_lower.split(" ")[0] # e.g. "lstm"
+                    artifacts_dir = os.path.dirname(DL_MODELS_DIR)
+                    model_path = os.path.join(artifacts_dir, "artifacts", "models", f"{model_type_code}.pt")
+                    if os.path.exists(model_path):
+                        model_size = os.path.getsize(model_path) / (1024 * 1024)
+                    else:
+                        model_size = 15.0
+
+                    comparison["models"][model.name] = {
+                        "type": f"DL ({model_type_code.upper()})",
+                        "accuracy": params.get("accuracy", 0.0),
+                        "precision": params.get("precision", 0.0),
+                        "recall": params.get("recall", 0.0),
+                        "f1": params.get("f1_macro", 0.0),
+                        "latency_ms": params.get("latency_ms", 8.5),
+                        "throughput": params.get("throughput", 120.0),
+                        "memory_mb": params.get("memory_mb", 35.0),
+                        "training_time_seconds": params.get("training_time", 0.0),
+                        "model_size_mb": model_size,
+                        "inference_time_ms": params.get("latency_ms", 8.5)
+                    }
+        except Exception as ex:
+            logger.error(f"Failed to query registered models for comparison: {ex}")
+        finally:
+            db.close()
 
         return comparison

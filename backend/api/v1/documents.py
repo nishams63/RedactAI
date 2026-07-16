@@ -184,13 +184,77 @@ def preview_local_file(
 
     import os
     from fastapi.responses import FileResponse
+    from core.config import settings
+    
     local_path = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-        "local_storage",
+        settings.LOCAL_STORAGE_DIR,
         prefix,
         document_id,
         filename
     )
+    
     if not os.path.exists(local_path):
-        raise HTTPException(status_code=404, detail="Local file not found")
+        # Fallback: if requesting a redacted file, try to regenerate from the original upload
+        if prefix == "redacted":
+            upload_path = os.path.join(
+                settings.LOCAL_STORAGE_DIR,
+                "uploads",
+                document_id,
+                filename
+            )
+            if os.path.exists(upload_path):
+                # Try to generate the redacted version on-the-fly
+                try:
+                    import fitz
+                    from models.document_intelligence import DocumentEntity
+                    
+                    REDACT_TYPES = {
+                        "AADHAAR", "PAN", "PASSPORT", "DRIVING_LICENSE", "VOTER_ID",
+                        "EMAIL", "PHONE", "BANK_ACCOUNT", "CREDIT_CARD", "IFSC", "UPI_ID",
+                        "PERSON", "ADDRESS", "UK_NHS", "US_DRIVER_LICENSE", "PIN_CODE", "URL"
+                    }
+                    
+                    pdf_doc = fitz.open(upload_path)
+                    db_entities = db.query(DocumentEntity).filter(DocumentEntity.document_id == doc_uuid).all()
+                    
+                    redaction_targets = {}
+                    for db_ent in db_entities:
+                        if db_ent.entity_type not in REDACT_TYPES:
+                            continue
+                        p_num = db_ent.page_number
+                        if p_num not in redaction_targets:
+                            redaction_targets[p_num] = set()
+                        val = db_ent.value.strip().replace("\n", " ").replace("\r", " ")
+                        val = " ".join(val.split())
+                        if len(val) >= 2:
+                            redaction_targets[p_num].add(val)
+                            words = val.split()
+                            if len(words) > 1:
+                                for w in words:
+                                    if len(w) >= 3:
+                                        redaction_targets[p_num].add(w)
+                    
+                    for p_num, targets in redaction_targets.items():
+                        if 0 <= p_num - 1 < len(pdf_doc):
+                            page = pdf_doc[p_num - 1]
+                            for target_text in targets:
+                                rects = page.search_for(target_text)
+                                for rect in rects:
+                                    page.add_redact_annot(rect, fill=(0, 0, 0))
+                            page.apply_redactions()
+                    
+                    # Save the regenerated redacted file
+                    os.makedirs(os.path.dirname(local_path), exist_ok=True)
+                    pdf_doc.save(local_path)
+                    pdf_doc.close()
+                except Exception as e:
+                    logger.warning(f"Failed to regenerate redacted file on-the-fly: {e}")
+                    # Fall back to serving the original upload
+                    local_path = upload_path
+            else:
+                raise HTTPException(status_code=404, detail="File not found. The document may need to be re-uploaded and reprocessed.")
+        else:
+            raise HTTPException(status_code=404, detail="Local file not found")
+    
     return FileResponse(local_path)
+

@@ -1,0 +1,9 @@
+Analyze the following conversation history between a user and the RedactAI Legal Copilot.
+Generate a concise executive summary of the consultation (maximum 3 sentences) and a short, descriptive title (maximum 6 words) for this conversation.
+
+Conversation History:
+{% for msg in history %}
+{{ msg.role }}: {{ msg.content }}
+{% endfor %}
+
+Provide output in JSON format with exactly two keys: "title" and "summary".

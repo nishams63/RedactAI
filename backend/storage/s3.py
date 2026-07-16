@@ -17,8 +17,7 @@ REDACTED_PREFIX = "redacted"
 REPORTS_PREFIX = "reports"
 TEMP_PREFIX = "temp"
 
-_BACKEND_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-_LOCAL_STORAGE_DIR = os.path.join(_BACKEND_ROOT, "local_storage")
+_LOCAL_STORAGE_DIR = settings.LOCAL_STORAGE_DIR
 
 
 def _minio_is_reachable(endpoint: str, timeout: float = 0.3) -> bool:
@@ -173,7 +172,9 @@ class StorageClient:
 
     def get_presigned_url(self, storage_path: str, expiration: int = 3600) -> Optional[str]:
         if storage_path.startswith("local://"):
-            return f"http://localhost:8000/api/v1/documents/local-preview/{storage_path.replace('local://', '')}"
+            clean_path = storage_path.replace('local://', '')
+            backend_url = settings.BACKEND_URL.rstrip('/')
+            return f"{backend_url}/api/v1/documents/local-preview/{clean_path}"
         if not self._minio_online:
             return None
         try:

@@ -8,7 +8,10 @@ from models.ai_models import (
     PromptRegistry, BenchmarkQuestion, BenchmarkRun, PerformanceProfile, PerformanceBenchmark, 
     QueueMetric, UserSession, LoginAttempt, PasswordHistory, AuditLog, SecurityAlert
 )
-from models.ml_models import TrainingDataset, MLPrediction, ModelEvaluation, FeatureImportance, ExperimentRun
+from models.ml_models import TrainingDataset, MLPrediction, ModelEvaluation, FeatureImportance, ExperimentRun, DLExperiment
+from models.rag import RAGChunk, RAGEmbedding, RAGRelationship, RAGSearchAnalytics
+from models.graph import GraphNode, GraphEdge
+from models.agent_registry import AgentRegistryModel, AgentMetricsLog
 
 __all__ = [
     "Organization",
@@ -45,4 +48,18 @@ __all__ = [
     "ModelEvaluation",
     "FeatureImportance",
     "ExperimentRun",
+    "DLExperiment",
+    "RAGChunk",
+    "RAGEmbedding",
+    "RAGRelationship",
+    "RAGSearchAnalytics",
+    "CopilotConversation",
+    "CopilotMessage",
+    "CopilotMemory",
+    "CopilotWorkspaceItem",
+    "CopilotHumanReview",
+    "GraphNode",
+    "GraphEdge",
+    "AgentRegistryModel",
+    "AgentMetricsLog",
 ]

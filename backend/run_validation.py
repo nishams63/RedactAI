@@ -116,7 +116,7 @@ def delete_document_cascade(db, title):
     coll = db.query(Document).filter(Document.title == title).first()
     if coll:
         doc_id = coll.id
-        from models.ai_models import DetectedEntity, Redaction, ComplianceResult, ProcessingLog
+        from models.ai_models import DetectedEntity, Redaction, ComplianceResult, ProcessingLog, HumanReview
         from models.ml_models import MLPrediction
         from models.document_intelligence import DocumentMetadata, DocumentPage, DocumentBlock, DocumentEntity as DocEntityTable, ProcessingJob
         
@@ -130,6 +130,7 @@ def delete_document_cascade(db, title):
         db.query(DocumentBlock).filter(DocumentBlock.document_id == doc_id).delete()
         db.query(DocEntityTable).filter(DocEntityTable.document_id == doc_id).delete()
         db.query(ProcessingJob).filter(ProcessingJob.document_id == doc_id).delete()
+        db.query(HumanReview).filter(HumanReview.document_id == doc_id).delete()
         
         db.delete(coll)
         db.commit()
@@ -194,8 +195,13 @@ class ValidationRunner:
             doc_record = loop.run_until_complete(self.doc_service.upload_document(upload_file, title, self.user, DummyBackgroundTasks()))
             loop.close()
 
-            proc_start = time.time()
-            process_document_pipeline(str(doc_record.id))
+            # If the pipeline has already run (e.g. synchronously during upload in non-celery mode), skip rerun
+            self.db.commit()
+            self.db.expire_all()
+            job = self.db.query(ProcessingJob).filter(ProcessingJob.document_id == doc_record.id).first()
+            if not job or job.status not in ["COMPLETED", "FAILED"]:
+                proc_start = time.time()
+                process_document_pipeline(str(doc_record.id))
             total_duration = time.time() - start_time
 
             # Query results
@@ -289,8 +295,12 @@ class ValidationRunner:
                 doc_record = loop.run_until_complete(self.doc_service.upload_document(upload_file, title, self.user, DummyBackgroundTasks()))
                 loop.close()
 
-                # Process
-                res = process_document_pipeline(str(doc_record.id))
+                # Process - only run if not already processed during upload
+                self.db.commit()
+                self.db.expire_all()
+                job = self.db.query(ProcessingJob).filter(ProcessingJob.document_id == doc_record.id).first()
+                if not job or job.status not in ["COMPLETED", "FAILED"]:
+                    res = process_document_pipeline(str(doc_record.id))
                 status = "SUCCESS"
             except Exception as e:
                 status = "FAILED"

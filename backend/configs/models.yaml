@@ -1,0 +1,13 @@
+# Deep Learning Model Configurations
+transformer:
+  model_name: "nlpaueb/legal-bert-base-uncased"
+  max_length: 512
+  num_labels: 4
+
+sequence_models:
+  vocab_size: 30522 # Matches nlpaueb/legal-bert-base-uncased tokenizer vocabulary size
+  embedding_dim: 128
+  hidden_dim: 128
+  num_layers: 1
+  dropout: 0.2
+  output_dim: 4

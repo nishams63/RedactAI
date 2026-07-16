@@ -1,0 +1,32 @@
+[
+  {
+    "query_id": "q1",
+    "expected_citations": [
+      {
+        "source": "DPDP Act 2023",
+        "section_number": "8",
+        "title": "Obligations of Data Fiduciary"
+      }
+    ]
+  },
+  {
+    "query_id": "q2",
+    "expected_citations": [
+      {
+        "source": "UIDAI Circular",
+        "section_number": "3.2",
+        "title": "Aadhaar Masking Requirements"
+      }
+    ]
+  },
+  {
+    "query_id": "q3",
+    "expected_citations": [
+      {
+        "source": "RBI KYC Directions",
+        "section_number": "46",
+        "title": "Penalties and Sanctions"
+      }
+    ]
+  }
+]

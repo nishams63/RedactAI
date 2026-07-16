@@ -29,6 +29,15 @@ from services.legal_ai.embedder import LocalSentenceEmbedder
 from services.deep_learning.predictor import LegalBERTClassifier
 
 class TestRenderStartup(unittest.TestCase):
+    def setUp(self):
+        from core.optional_dependencies import _MOCK_OVERRIDES
+        for dep in ["torch", "transformers", "sentence_transformers", "onnxruntime", "xgboost", "spacy", "easyocr", "paddleocr", "reportlab"]:
+            _MOCK_OVERRIDES[dep] = False
+
+    def tearDown(self):
+        from core.optional_dependencies import _MOCK_OVERRIDES
+        _MOCK_OVERRIDES.clear()
+
     def test_render_deployment_startup(self):
         """Simulate and verify the application startup lifecycle on the Render Free Tier."""
         # Check that OptionalDependencyManager reports everything as unavailable

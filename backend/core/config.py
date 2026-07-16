@@ -63,7 +63,8 @@ class Settings(BaseSettings):
     MINIO_SECRET_KEY: Optional[str] = None
     MINIO_BUCKET: str = "redactai-storage"
     MINIO_SECURE: bool = False
-    BACKEND_URL: str = "http://localhost:8000"
+    BACKEND_URL: str = os.getenv("RENDER_EXTERNAL_URL", os.getenv("BACKEND_URL", "http://localhost:8000"))
+    LOCAL_STORAGE_DIR: str = ""
 
     # JWT & Encryption
     JWT_SECRET_KEY: str
@@ -89,6 +90,15 @@ class Settings(BaseSettings):
         mode = os.getenv("DEPLOYMENT_MODE", "production")
         if not v or mode in ("single", "huggingface"):
             return ""
+        return v
+
+    @field_validator("LOCAL_STORAGE_DIR", mode="before")
+    @classmethod
+    def default_local_storage_dir(cls, v: Optional[str]) -> str:
+        if not v:
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            parent_dir = os.path.dirname(current_dir)
+            return os.path.join(parent_dir, "local_storage")
         return v
 
     # CORS

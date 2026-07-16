@@ -143,3 +143,28 @@ class ExperimentRun(Base):
     dataset = relationship("TrainingDataset", back_populates="experiments")
     evaluations = relationship("ModelEvaluation", back_populates="experiment", cascade="all, delete-orphan")
     feature_importances = relationship("FeatureImportance", back_populates="experiment", cascade="all, delete-orphan")
+
+
+class DLExperiment(Base):
+    """Deep Learning / Sequence modeling experiment run tracking registry."""
+    __tablename__ = "dl_experiments"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    experiment_id = Column(String(100), nullable=False, index=True)
+    model_name = Column(String(255), nullable=False)
+    dataset_version = Column(String(50), nullable=True)
+    learning_rate = Column(Float, nullable=True)
+    batch_size = Column(Integer, nullable=True)
+    epochs = Column(Integer, nullable=True)
+    optimizer = Column(String(50), nullable=True)
+    loss = Column(Float, nullable=True)
+    accuracy = Column(Float, nullable=True)
+    precision = Column(Float, nullable=True)
+    recall = Column(Float, nullable=True)
+    f1 = Column(Float, nullable=True)
+    training_time = Column(Float, nullable=True)
+    hardware = Column(String(50), nullable=True)
+    random_seed = Column(Integer, nullable=True)
+    checkpoint_path = Column(String(500), nullable=True)
+    onnx_export = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)

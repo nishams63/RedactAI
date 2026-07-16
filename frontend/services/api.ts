@@ -30,10 +30,47 @@ class ApiClient {
       headers["Content-Type"] = "application/json";
     }
 
-    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+    let response = await fetch(`${this.baseUrl}${endpoint}`, {
       ...options,
       headers,
     });
+
+    if (
+      response.status === 401 &&
+      endpoint !== "/auth/login" &&
+      endpoint !== "/auth/register" &&
+      endpoint !== "/auth/refresh"
+    ) {
+      const refreshToken = typeof window !== "undefined" ? localStorage.getItem("refresh_token") : null;
+      if (refreshToken) {
+        try {
+          const refreshRes = await fetch(`${this.baseUrl}/auth/refresh`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ refresh_token: refreshToken }),
+          });
+          if (refreshRes.ok) {
+            const data = await refreshRes.json();
+            localStorage.setItem("access_token", data.access_token);
+            localStorage.setItem("refresh_token", data.refresh_token);
+
+            headers["Authorization"] = `Bearer ${data.access_token}`;
+            response = await fetch(`${this.baseUrl}${endpoint}`, {
+              ...options,
+              headers,
+            });
+          } else {
+            localStorage.removeItem("access_token");
+            localStorage.removeItem("refresh_token");
+            if (typeof window !== "undefined") {
+              window.location.href = "/login";
+            }
+          }
+        } catch (e) {
+          console.error("Failed to refresh token:", e);
+        }
+      }
+    }
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ detail: "Request failed" }));
@@ -191,6 +228,16 @@ class ApiClient {
     return this.request<any[]>("/dl/models");
   }
 
+  async getDLProgress() {
+    return this.request<any>("/dl/progress");
+  }
+
+  async trainSequenceModel(modelType: string, datasetSize: number = 500) {
+    return this.request<any>(`/dl/train-sequence?model_type=${modelType}&dataset_size=${datasetSize}`, {
+      method: "POST"
+    });
+  }
+
   async getDLEvaluation() {
     return this.request<any>("/dl/evaluation");
   }
@@ -283,6 +330,47 @@ class ApiClient {
 
   async getHistoricalBenchmarks() {
     return this.request<any>("/legal/performance/benchmarks");
+  }
+
+  // ─── Enterprise RAG (Level 3 Sprint 3.1) ──────────────────────
+  async indexDocumentRAG(documentId: string, chunkStrategy: string = "paragraph", embeddingModel: string = "MiniLM") {
+    return this.request<any>("/rag/index", {
+      method: "POST",
+      body: JSON.stringify({ document_id: documentId, chunk_strategy: chunkStrategy, embedding_model: embeddingModel })
+    });
+  }
+
+  async queryRAG(query: string, documentId?: string, filters?: any, conversationId?: string, messageId?: string, parentMessageId?: string) {
+    return this.request<any>("/rag/query", {
+      method: "POST",
+      body: JSON.stringify({
+        query,
+        document_id: documentId,
+        filters,
+        conversation_id: conversationId,
+        message_id: messageId,
+        parent_message_id: parentMessageId
+      })
+    });
+  }
+
+  async getRAGDocuments() {
+    return this.request<any[]>("/rag/documents");
+  }
+
+  async getRAGStatistics() {
+    return this.request<any>("/rag/statistics");
+  }
+
+  async getRAGEvaluations() {
+    return this.request<any>("/rag/evaluation");
+  }
+
+  async reindexRAG(newModel: string) {
+    return this.request<any>("/rag/reindex", {
+      method: "POST",
+      body: JSON.stringify({ new_embedding_model: newModel })
+    });
   }
 }
 

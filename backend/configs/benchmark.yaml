@@ -1,0 +1,20 @@
+# Benchmarking parameters and settings
+slm_benchmark:
+  models:
+    - "Qwen/Qwen2.5-0.5B-Instruct"
+    - "microsoft/Phi-3-mini-4k-instruct"
+    - "google/gemma-2b"
+    - "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+    - "HuggingFaceTB/SmolLM-135M"
+    - "sentence-transformers/all-MiniLM-L6-v2"
+  batch_size: 1
+  max_new_tokens: 128
+  timeout_seconds: 15
+
+sequence_benchmark:
+  batch_size: 8
+  runs: 5
+
+transformer_benchmark:
+  batch_size: 8
+  runs: 3

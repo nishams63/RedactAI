@@ -19,13 +19,13 @@ class TestAuthEndpoints:
     def test_register_success(self):
         response = client.post("/api/v1/auth/register", json={
             "email": "test@example.com",
-            "password": "TestPassword123",
+            "password": "TestPassword123!",
             "full_name": "Test User",
             "organization_name": "Test Org",
         })
         # In a real test environment with DB, this should return 201
         # Here we verify the endpoint is reachable
-        assert response.status_code in [201, 500]  # 500 if DB is unavailable
+        assert response.status_code in [201, 409, 500]  # 500 if DB is unavailable, 409 if already exists
 
     def test_login_invalid_credentials(self):
         response = client.post("/api/v1/auth/login", json={

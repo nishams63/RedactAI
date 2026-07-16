@@ -22,6 +22,15 @@ ALEMBIC_TABLES = {
     "benchmark_questions",
     "benchmark_runs",
     "prompt_registry",
+    "copilot_conversations",
+    "copilot_messages",
+    "copilot_memories",
+    "copilot_workspace_items",
+    "copilot_human_reviews",
+    "graph_nodes",
+    "graph_edges",
+    "agent_registry",
+    "agent_metrics_log",
 }
 
 def bootstrap():

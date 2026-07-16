@@ -1,0 +1,17 @@
+[
+  {
+    "query_id": "q1",
+    "query": "What are the notice obligations for data breach notification under DPDP?",
+    "category": "compliance"
+  },
+  {
+    "query_id": "q2",
+    "query": "Is Aadhaar masking mandatory for customer onboarding files?",
+    "category": "security"
+  },
+  {
+    "query_id": "q3",
+    "query": "What is the penalty for non-compliance with RBI KYC guidelines?",
+    "category": "penalty"
+  }
+]

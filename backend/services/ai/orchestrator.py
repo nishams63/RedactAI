@@ -320,8 +320,13 @@ class AIOrchestrator:
                     "reading_order": b["reading_order"]
                 } for b in layout_blocks]
                 semantic_search_engine.index_document(doc.id, doc.organization_id, blocks_for_indexing)
+                
+                # Auto-index in Enterprise RAG Knowledge Base
+                from services.legal_ai.embedding_pipeline import RAGEmbeddingPipeline
+                rag_count = RAGEmbeddingPipeline.index_document_rag(self.db, doc.id)
+                logger.info(f"RAG Knowledge Base indexing complete. Indexed {rag_count} chunks for document {doc.id}")
             except Exception as index_err:
-                logger.error(f"Semantic search indexing failed: {index_err}")
+                logger.error(f"RAG/Semantic search indexing failed: {index_err}")
 
             self._log_stage(doc.id, "EXTRACTING", f"Text extraction complete. Total pages saved: {page_count}.")
 

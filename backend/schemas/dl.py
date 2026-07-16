@@ -43,6 +43,8 @@ class ModelPerformanceItem(BaseModel):
     throughput: float
     memory_mb: float
     training_time_seconds: float
+    model_size_mb: float
+    inference_time_ms: float
 
 
 class DLComparisonResponse(BaseModel):
@@ -57,3 +59,12 @@ class DLInferenceResponse(BaseModel):
     confidence: float
     agreement: bool
     inference_time_ms: float
+
+
+class DLProgressResponse(BaseModel):
+    current_epoch: int
+    total_epochs: int
+    current_loss: float
+    val_accuracy: float
+    estimated_time_remaining: float
+    status: str

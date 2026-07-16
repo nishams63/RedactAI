@@ -1,0 +1,14 @@
+[
+  {
+    "query_id": "q1",
+    "expected_answer": "Under the DPDP Act 2023, in the event of a personal data breach, the data fiduciary must notify the Data Protection Board of India and each affected data principal."
+  },
+  {
+    "query_id": "q2",
+    "expected_answer": "Yes, Aadhaar masking is mandatory under UIDAI guidelines. Fiduciaries must mask the first 8 digits of Aadhaar numbers before storing or sharing files."
+  },
+  {
+    "query_id": "q3",
+    "expected_answer": "Non-compliance with RBI KYC directions can lead to monetary penalties, warnings, or restrictions on business operations as specified under the Banking Regulation Act."
+  }
+]
