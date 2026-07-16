@@ -45,6 +45,8 @@ def get_agent_registry(
     current_user: User = Depends(get_current_user)
 ):
     """Returns list of registered agents and their active capabilities."""
+    # Instantiating the orchestrator triggers default agents self-registration
+    AgentOrchestratorV2(db)
     agents = db.query(AgentRegistryModel).all()
     return [
         {
@@ -96,6 +98,7 @@ def get_agent_health_metrics(
     current_user: User = Depends(get_current_user)
 ):
     """Retrieves execution metrics and average latencies for all registered agent tags."""
+    AgentOrchestratorV2(db)
     metrics = db.query(AgentMetricsLog).all()
     return [
         {

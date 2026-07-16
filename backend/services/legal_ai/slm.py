@@ -34,6 +34,11 @@ class LocalSLMInferenceEngine:
             except Exception as e:
                 print(f"Warm up execution skipped: {e}")
 
+    def generate(self, prompt: str) -> str:
+        """Helper to match single-argument generation syntax."""
+        result = self.generate_response("You are a helpful legal assistant.", prompt)
+        return result.get("text", "")
+
     def generate_response(self, system_prompt: str, user_prompt: str) -> Dict[str, Any]:
         """Generate response with explicit indication of the reasoning engine used, checking response cache."""
         cache_key = f"{system_prompt}_{user_prompt}"
