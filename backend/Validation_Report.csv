@@ -1,0 +1,8 @@
+Document Type,Expected Sensitivity,Predicted Sensitivity,Confidence,F1 Score,CER,WER,Processing Time
+NDA,Confidential,Confidential,0.87,0.48,0.0450,0.0469,23.99s
+EMPLOYMENT_CONTRACT,Confidential,Confidential,0.84,0.42,0.0673,0.0465,6.67s
+SERVICE_AGREEMENT,Internal,Internal,0.92,0.40,0.0677,0.0513,7.40s
+INVOICE,Internal,Internal,0.78,0.38,0.0571,0.0741,6.29s
+GOVERNMENT_FORM,Confidential,Confidential,0.87,0.53,0.1023,0.1290,6.33s
+MEDICAL_RECORD,Highly Confidential,Highly Confidential,0.88,1.00,0.1221,0.1034,6.16s
+COURT_ORDER,Public,Public,0.89,0.50,0.0902,0.0952,5.97s

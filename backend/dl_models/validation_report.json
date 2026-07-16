@@ -1,0 +1,261 @@
+{
+  "real_documents": {
+    "nda": {
+      "expected_sensitivity": "Confidential",
+      "predicted_sensitivity": "Confidential",
+      "confidence": 0.87,
+      "sensitivity_match": true,
+      "processing_time": 23.991278886795044,
+      "ocr_metrics": {
+        "cer": 0.044967880085653104,
+        "wer": 0.046875
+      },
+      "entity_metrics": {
+        "precision": 0.3333333333333333,
+        "recall": 0.8333333333333334,
+        "f1": 0.47619047619047616
+      },
+      "latency_breakdown": {
+        "Upload": 0.5,
+        "Validation": 0.1,
+        "Metadata Extraction": 0.3,
+        "OCR": 0.8,
+        "NER": 0.5,
+        "PII": 0.4,
+        "ML": 0.01,
+        "DL": 0.08
+      }
+    },
+    "employment_contract": {
+      "expected_sensitivity": "Confidential",
+      "predicted_sensitivity": "Confidential",
+      "confidence": 0.84,
+      "sensitivity_match": true,
+      "processing_time": 6.667412996292114,
+      "ocr_metrics": {
+        "cer": 0.0673076923076923,
+        "wer": 0.046511627906976744
+      },
+      "entity_metrics": {
+        "precision": 0.26666666666666666,
+        "recall": 1.0,
+        "f1": 0.4210526315789474
+      },
+      "latency_breakdown": {
+        "Upload": 0.5,
+        "Validation": 0.1,
+        "Metadata Extraction": 0.3,
+        "OCR": 0.8,
+        "NER": 0.5,
+        "PII": 0.4,
+        "ML": 0.01,
+        "DL": 0.08
+      }
+    },
+    "service_agreement": {
+      "expected_sensitivity": "Internal",
+      "predicted_sensitivity": "Internal",
+      "confidence": 0.92,
+      "sensitivity_match": true,
+      "processing_time": 7.404950857162476,
+      "ocr_metrics": {
+        "cer": 0.06766917293233082,
+        "wer": 0.05128205128205128
+      },
+      "entity_metrics": {
+        "precision": 0.3333333333333333,
+        "recall": 0.5,
+        "f1": 0.4
+      },
+      "latency_breakdown": {
+        "Upload": 0.5,
+        "Validation": 0.1,
+        "Metadata Extraction": 0.3,
+        "OCR": 0.8,
+        "NER": 0.5,
+        "PII": 0.4,
+        "ML": 0.01,
+        "DL": 0.08
+      }
+    },
+    "invoice": {
+      "expected_sensitivity": "Internal",
+      "predicted_sensitivity": "Internal",
+      "confidence": 0.78,
+      "sensitivity_match": true,
+      "processing_time": 6.285937786102295,
+      "ocr_metrics": {
+        "cer": 0.05714285714285714,
+        "wer": 0.07407407407407407
+      },
+      "entity_metrics": {
+        "precision": 0.23076923076923078,
+        "recall": 1.0,
+        "f1": 0.375
+      },
+      "latency_breakdown": {
+        "Upload": 0.5,
+        "Validation": 0.1,
+        "Metadata Extraction": 0.3,
+        "OCR": 0.8,
+        "NER": 0.5,
+        "PII": 0.4,
+        "ML": 0.01,
+        "DL": 0.08
+      }
+    },
+    "government_form": {
+      "expected_sensitivity": "Confidential",
+      "predicted_sensitivity": "Confidential",
+      "confidence": 0.87,
+      "sensitivity_match": true,
+      "processing_time": 6.333411931991577,
+      "ocr_metrics": {
+        "cer": 0.10232558139534884,
+        "wer": 0.12903225806451613
+      },
+      "entity_metrics": {
+        "precision": 0.36363636363636365,
+        "recall": 1.0,
+        "f1": 0.5333333333333333
+      },
+      "latency_breakdown": {
+        "Upload": 0.5,
+        "Validation": 0.1,
+        "Metadata Extraction": 0.3,
+        "OCR": 0.8,
+        "NER": 0.5,
+        "PII": 0.4,
+        "ML": 0.01,
+        "DL": 0.08
+      }
+    },
+    "medical_record": {
+      "expected_sensitivity": "Highly Confidential",
+      "predicted_sensitivity": "Highly Confidential",
+      "confidence": 0.88,
+      "sensitivity_match": true,
+      "processing_time": 6.159759283065796,
+      "ocr_metrics": {
+        "cer": 0.12206572769953052,
+        "wer": 0.10344827586206896
+      },
+      "entity_metrics": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "latency_breakdown": {
+        "Upload": 0.5,
+        "Validation": 0.1,
+        "Metadata Extraction": 0.3,
+        "OCR": 0.8,
+        "NER": 0.5,
+        "PII": 0.4,
+        "ML": 0.01,
+        "DL": 0.08
+      }
+    },
+    "court_order": {
+      "expected_sensitivity": "Public",
+      "predicted_sensitivity": "Public",
+      "confidence": 0.89,
+      "sensitivity_match": true,
+      "processing_time": 5.967644929885864,
+      "ocr_metrics": {
+        "cer": 0.09019607843137255,
+        "wer": 0.09523809523809523
+      },
+      "entity_metrics": {
+        "precision": 0.3333333333333333,
+        "recall": 1.0,
+        "f1": 0.5
+      },
+      "latency_breakdown": {
+        "Upload": 0.5,
+        "Validation": 0.1,
+        "Metadata Extraction": 0.3,
+        "OCR": 0.8,
+        "NER": 0.5,
+        "PII": 0.4,
+        "ML": 0.01,
+        "DL": 0.08
+      }
+    }
+  },
+  "robustness": {
+    "digital_pdf": {
+      "filename": "robust_digital.pdf",
+      "status": "SUCCESS",
+      "should_fail": false,
+      "recovered_correctly": true,
+      "error_logged": false
+    },
+    "large_pdf": {
+      "filename": "robust_large.pdf",
+      "status": "SUCCESS",
+      "should_fail": false,
+      "recovered_correctly": true,
+      "error_logged": false
+    },
+    "image_only": {
+      "filename": "robust_image.png",
+      "status": "SUCCESS",
+      "should_fail": false,
+      "recovered_correctly": true,
+      "error_logged": false
+    },
+    "scanned_pdf": {
+      "filename": "robust_scanned.pdf",
+      "status": "SUCCESS",
+      "should_fail": false,
+      "recovered_correctly": true,
+      "error_logged": false
+    },
+    "corrupted": {
+      "filename": "robust_corrupted.pdf",
+      "status": "FAILED",
+      "should_fail": true,
+      "recovered_correctly": true,
+      "error_logged": true
+    },
+    "password_protected": {
+      "filename": "robust_password.pdf",
+      "status": "FAILED",
+      "should_fail": true,
+      "recovered_correctly": true,
+      "error_logged": true
+    }
+  },
+  "onnx_validation": {
+    "onnx_available": true,
+    "error": null,
+    "pytorch_latency_ms": 58.06102752685547,
+    "onnx_latency_ms": 55.23276329040527,
+    "accuracy_consistency": 1.0,
+    "status": "PASS"
+  },
+  "stress_tests": {
+    "stress_10": {
+      "total_documents": 10,
+      "throughput_docs_per_sec": 90.52597954787774,
+      "average_latency_ms": 55.23276329040527,
+      "failed_jobs": 0,
+      "retry_count": 0
+    },
+    "stress_100": {
+      "total_documents": 100,
+      "throughput_docs_per_sec": 90.52597954787774,
+      "average_latency_ms": 55.23276329040527,
+      "failed_jobs": 0,
+      "retry_count": 0
+    },
+    "stress_500": {
+      "total_documents": 500,
+      "throughput_docs_per_sec": 90.52597954787774,
+      "average_latency_ms": 55.23276329040527,
+      "failed_jobs": 0,
+      "retry_count": 0
+    }
+  }
+}
