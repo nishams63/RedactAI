@@ -1,8 +1,15 @@
 import uuid
-import networkx as nx
+import logging
 from typing import Dict, Any
 from sqlalchemy.orm import Session
 from services.legal_ai.graph_traversal import KnowledgeGraphTraversalEngine
+
+try:
+    import networkx as nx
+    _HAS_NETWORKX = True
+except ImportError:
+    nx = None
+    _HAS_NETWORKX = False
 
 class KnowledgeGraphObservability:
     def __init__(self, db: Session, organization_id: uuid.UUID):
@@ -13,6 +20,13 @@ class KnowledgeGraphObservability:
     def get_metrics(self, document_version_id: uuid.UUID | None = None) -> Dict[str, Any]:
         """Calculates graph structural metrics for dashboard reporting."""
         G = self.engine.load_networkx_graph(document_version_id)
+        
+        if G is None:
+            return {
+                "node_count": 0, "edge_count": 0, "density": 0.0,
+                "isolated_nodes_count": 0, "avg_degree": 0.0,
+                "largest_component_size": 0, "diameter": 0
+            }
         
         node_count = len(G.nodes)
         edge_count = len(G.edges)

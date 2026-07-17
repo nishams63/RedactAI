@@ -10,6 +10,7 @@ from models.ai_models import (
 )
 from models.ml_models import TrainingDataset, MLPrediction, ModelEvaluation, FeatureImportance, ExperimentRun, DLExperiment
 from models.rag import RAGChunk, RAGEmbedding, RAGRelationship, RAGSearchAnalytics
+from models.copilot import CopilotConversation, CopilotMessage, CopilotMemory, CopilotWorkspaceItem, CopilotHumanReview
 from models.graph import GraphNode, GraphEdge
 from models.agent_registry import AgentRegistryModel, AgentMetricsLog
 

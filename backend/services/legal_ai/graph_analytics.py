@@ -1,8 +1,15 @@
 import uuid
-import networkx as nx
+import logging
 from typing import Dict, Any, List
 from sqlalchemy.orm import Session
 from services.legal_ai.graph_traversal import KnowledgeGraphTraversalEngine
+
+try:
+    import networkx as nx
+    _HAS_NETWORKX = True
+except ImportError:
+    nx = None
+    _HAS_NETWORKX = False
 
 class KnowledgeGraphAnalytics:
     def __init__(self, db: Session, organization_id: uuid.UUID):
@@ -13,7 +20,7 @@ class KnowledgeGraphAnalytics:
     def compute_analytics(self, document_version_id: uuid.UUID | None = None) -> Dict[str, Any]:
         """Calculates Louvain communities, PageRanks, centralities, and hubs."""
         G = self.engine.load_networkx_graph(document_version_id)
-        if not G or len(G.nodes) == 0:
+        if G is None or len(G.nodes) == 0:
             return {
                 "communities": [],
                 "betweenness_centrality": [],

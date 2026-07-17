@@ -1,16 +1,26 @@
 import uuid
-import networkx as nx
+import logging
 from typing import Dict, Any, List, Set, Tuple
 from sqlalchemy.orm import Session
 from models.graph import GraphNode, GraphEdge
+
+try:
+    import networkx as nx
+    _HAS_NETWORKX = True
+except ImportError:
+    nx = None
+    _HAS_NETWORKX = False
+    logging.getLogger("redactai").warning("networkx not installed. Knowledge graph traversal features will be unavailable.")
 
 class KnowledgeGraphTraversalEngine:
     def __init__(self, db: Session, organization_id: uuid.UUID):
         self.db = db
         self.org_id = organization_id
 
-    def load_networkx_graph(self, document_version_id: uuid.UUID | None = None) -> nx.DiGraph:
+    def load_networkx_graph(self, document_version_id: uuid.UUID | None = None):
         """Loads nodes and edges matching the tenant/organization into a NetworkX DiGraph."""
+        if not _HAS_NETWORKX:
+            return None
         from services.legal_ai.graph_cache import graph_cache
         cache_key = f"graph_{self.org_id}_{document_version_id}"
         cached = graph_cache.get(cache_key)
@@ -59,7 +69,7 @@ class KnowledgeGraphTraversalEngine:
     ) -> Dict[str, Any]:
         """Breadth First Search traversal tracing pathways and node sequences."""
         G = self.load_networkx_graph(document_version_id)
-        if start_node_id not in G:
+        if G is None or start_node_id not in G:
             return {"nodes": [], "edges": [], "explainability": []}
 
         visited_nodes = {}
@@ -121,7 +131,7 @@ class KnowledgeGraphTraversalEngine:
     ) -> Dict[str, Any]:
         """Depth First Search traversal tracing deep semantic references."""
         G = self.load_networkx_graph(document_version_id)
-        if start_node_id not in G:
+        if G is None or start_node_id not in G:
             return {"nodes": [], "edges": [], "explainability": []}
 
         visited_nodes = {}
@@ -180,7 +190,7 @@ class KnowledgeGraphTraversalEngine:
     ) -> List[Dict[str, Any]]:
         """Computes PageRank centered around seed entity labels for semantic prioritization."""
         G = self.load_networkx_graph(document_version_id)
-        if not G or len(G.nodes) == 0:
+        if G is None or len(G.nodes) == 0:
             return []
 
         personalization = {}
