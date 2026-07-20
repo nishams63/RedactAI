@@ -3,6 +3,11 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "framework": "nextjs",
+  "build": {
+    "env": {
+      "NEXT_PUBLIC_API_URL": "https://redactai-ogdi.onrender.com/api/v1"
+    }
+  },
   "headers": [
     {
       "source": "/(.*)",

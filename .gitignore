@@ -3,6 +3,8 @@
 .env.*
 !.env.example
 !.env.template
+# Allow frontend production env (only contains public NEXT_PUBLIC_* vars)
+!frontend/.env.production
 
 # Python
 __pycache__/
