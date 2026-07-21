@@ -70,7 +70,7 @@ class Settings(BaseSettings):
     JWT_SECRET_KEY: str
     JWT_REFRESH_SECRET_KEY: str
     ENCRYPTION_KEY: str = "XEfwmtmC9_gIOpoqPIY7kthp84fsSQuhg2IxjAiAB2E=" # default 32-byte Fernet key
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     PASSWORD_EXPIRATION_DAYS: int = 0 # 0 means disabled by default
     MAX_ACTIVE_SESSIONS: int = 5

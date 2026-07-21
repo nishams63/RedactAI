@@ -30,10 +30,39 @@ class ApiClient {
       headers["Content-Type"] = "application/json";
     }
 
-    let response = await fetch(`${this.baseUrl}${endpoint}`, {
-      ...options,
-      headers,
-    });
+    // Retry logic for Render cold starts (TypeError: Failed to fetch)
+    const MAX_RETRIES = 3;
+    const RETRY_DELAYS = [2000, 4000, 8000]; // exponential backoff in ms
+
+    let lastError: Error | null = null;
+    let response: Response | null = null;
+
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        response = await fetch(`${this.baseUrl}${endpoint}`, {
+          ...options,
+          headers,
+        });
+        lastError = null;
+        break; // success — exit retry loop
+      } catch (err: any) {
+        lastError = err;
+        if (attempt < MAX_RETRIES) {
+          console.warn(
+            `Request to ${endpoint} failed (attempt ${attempt + 1}/${MAX_RETRIES + 1}): ${err.message}. Retrying in ${RETRY_DELAYS[attempt]}ms...`
+          );
+          await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS[attempt]));
+        }
+      }
+    }
+
+    if (lastError || !response) {
+      throw new Error(
+        lastError?.message === "Failed to fetch"
+          ? "Server is waking up — please try again in a few seconds."
+          : lastError?.message || "Network request failed"
+      );
+    }
 
     if (
       response.status === 401 &&
@@ -68,6 +97,11 @@ class ApiClient {
           }
         } catch (e) {
           console.error("Failed to refresh token:", e);
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+          if (typeof window !== "undefined") {
+            window.location.href = "/login";
+          }
         }
       }
     }

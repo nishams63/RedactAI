@@ -1,3 +1,12 @@
+import os
+import sys
+
+# Ensure parent backend directory is in sys.path for direct debugger execution
+current_dir = os.path.dirname(os.path.abspath(__file__))
+backend_dir = os.path.abspath(os.path.join(current_dir, "..", ".."))
+if backend_dir not in sys.path:
+    sys.path.insert(0, backend_dir)
+
 import uuid
 import time
 import json
